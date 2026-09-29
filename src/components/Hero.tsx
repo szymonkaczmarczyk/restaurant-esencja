@@ -48,7 +48,7 @@ const testimonials: Testimonial[] = [
   },
   {
     id: 6,
-    text: "Luksus w czystej postaci. Od samego wejścia czuje się elitarny i kameralny charakter restauracji. Cada potrawa to oddzielna historia.",
+    text: "Luksus w czystej postaci. Od samego wejścia czuje się elitarny i kameralny charakter restauracji. Każda potrawa to oddzielna historia.",
     author: "dr Elżbieta Wójcik, Warszawa",
     rating: 5,
   }
@@ -90,7 +90,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
     <div className="pt-20">
 
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[90vh] py-24 flex items-center justify-center overflow-hidden">
         {/* Background Image with Dark Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -113,8 +113,9 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               Ekskluzywna Podróż Kulinarna
             </span>
 
-            <div className="flex flex-col items-start">
+            <h1 className="flex flex-col items-start font-normal">
               <BlurText
+                as="span"
                 text="Sztuka ukryta"
                 delay={60}
                 animateBy="words"
@@ -122,47 +123,48 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
                 className="font-serif text-5xl md:text-7xl lg:text-8xl tracking-luxury font-light leading-none justify-start"
               />
               <BlurText
+                as="span"
                 text="w Esencji"
                 delay={60}
                 animateBy="words"
                 direction="bottom"
                 className="font-serif text-5xl md:text-7xl lg:text-8xl tracking-luxury font-light leading-none justify-start text-gold italic mt-2"
               />
-            </div>
+            </h1>
 
             <p className="font-sans text-base md:text-lg max-w-xl text-white/80 font-light leading-relaxed mt-2">
               Odkryj harmonię smaku i luksusu w samym sercu stolicy. Nasza kuchnia to harmonijne połączenie tradycji oraz nowoczesnych technik kulinarnych.
             </p>
+
+            {/* CTA bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-4 w-full sm:w-auto"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab('reservation')}
+                className="flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-neutralDark font-sans font-semibold tracking-luxury uppercase px-9 py-4 rounded border border-gold transition-all duration-300 hover:shadow-xl hover:shadow-gold/30 cursor-pointer whitespace-nowrap"
+              >
+                <Calendar size={18} />
+                Rezerwuj Stolik
+              </motion.button>
+              <div className="hidden sm:block h-6 w-px bg-white/20" />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab('menu')}
+                className="flex items-center justify-center gap-2 hover:bg-white/10 text-white font-sans tracking-luxury uppercase px-9 py-4 rounded border border-white/30 transition-all duration-300 cursor-pointer whitespace-nowrap"
+              >
+                Poznaj Menu
+                <ChevronRight size={18} />
+              </motion.button>
+            </motion.div>
           </motion.div>
         </div>
-
-        {/* Bottom-center CTA bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-          className="absolute bottom-36 left-1/2 translate-x-[-53%] flex flex-col sm:flex-row items-center gap-4 z-10"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setActiveTab('reservation')}
-            className="flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-neutralDark font-sans font-semibold tracking-luxury uppercase px-9 py-4 rounded border border-gold transition-all duration-300 hover:shadow-xl hover:shadow-gold/30 cursor-pointer whitespace-nowrap"
-          >
-            <Calendar size={18} />
-            Rezerwuj Stolik
-          </motion.button>
-          <div className="hidden sm:block h-6 w-px bg-white/20" />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setActiveTab('menu')}
-            className="flex items-center justify-center gap-2 hover:bg-white/10 text-white font-sans tracking-luxury uppercase px-9 py-4 rounded border border-white/30 transition-all duration-300 cursor-pointer whitespace-nowrap"
-          >
-            Poznaj Menu
-            <ChevronRight size={18} />
-          </motion.button>
-        </motion.div>
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-white/50">

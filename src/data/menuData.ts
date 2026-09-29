@@ -32,7 +32,7 @@ export const menuDishes: Dish[] = [
   {
     id: 'main-1',
     name: 'Polędwica Wagyu z Grzybami Leśnymi',
-    description: 'Najwyższej jakości wołowina Wagyu A5, fondant ziemniaczany z rozmarynem, glazurowane smardze, redukcja z porto i porto.',
+    description: 'Najwyższej jakości wołowina Wagyu A5, fondant ziemniaczany z rozmarynem, glazurowane smardze, redukcja z porto.',
     price: 240,
     category: 'mains',
     image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=800',

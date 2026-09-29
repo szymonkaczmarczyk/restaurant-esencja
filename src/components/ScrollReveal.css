@@ -1,13 +1,16 @@
-.scroll-reveal {
-  margin: 20px 0;
-}
+/* In a layer so Tailwind utilities passed via textClassName can override these defaults */
+@layer components {
+  .scroll-reveal {
+    margin: 20px 0;
+  }
 
-.scroll-reveal-text {
-  font-size: clamp(1.6rem, 4vw, 3rem);
-  line-height: 1.5;
-  font-weight: 600;
-}
+  .scroll-reveal-text {
+    font-size: clamp(1.6rem, 4vw, 3rem);
+    line-height: 1.5;
+    font-weight: 600;
+  }
 
-.word {
-  display: inline-block;
+  .word {
+    display: inline-block;
+  }
 }

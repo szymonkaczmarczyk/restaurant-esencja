@@ -1,37 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MapPin, Phone, Mail, Navigation } from 'lucide-react';
 
 export const ContactMap: React.FC = () => {
-  const [loadingRoute, setLoadingRoute] = useState(false);
+  const destinationAddress = "Krakowskie Przedmieście 4, 00-071 Warszawa";
 
-  const destinationAddress = "Krakowskie Przedmieście 4, 00-333 Warszawa";
-
-  // Geolocation trigger
+  // Opened synchronously from the click so popup blockers allow it; Google Maps
+  // uses the device location as the starting point on its own
   const handleNavigate = () => {
-    setLoadingRoute(true);
-
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${encodeURIComponent(destinationAddress)}&travelmode=driving`;
-          window.open(mapsUrl, '_blank');
-          setLoadingRoute(false);
-        },
-        (error) => {
-          console.error(error);
-          // If permission is denied or location unavailable, route from destination directly
-          const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinationAddress)}`;
-          window.open(fallbackUrl, '_blank');
-          setLoadingRoute(false);
-        },
-        { enableHighAccuracy: true, timeout: 6000 }
-      );
-    } else {
-      const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinationAddress)}`;
-      window.open(fallbackUrl, '_blank');
-      setLoadingRoute(false);
-    }
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinationAddress)}`;
+    window.open(mapsUrl, '_blank', 'noopener');
   };
 
   return (
@@ -74,7 +51,7 @@ export const ContactMap: React.FC = () => {
                     <div>
                       <span className="block text-xs uppercase tracking-widest text-primary/50 dark:text-neutralDark-text/50 mb-0.5">Adres</span>
                       <span className="font-sans text-sm text-primary dark:text-neutralDark-text font-medium">
-                        Krakowskie Przedmieście 4, 00-333 Warszawa
+                        Krakowskie Przedmieście 4, 00-071 Warszawa
                       </span>
                     </div>
                   </div>
@@ -111,14 +88,13 @@ export const ContactMap: React.FC = () => {
               <div className="mt-12 pt-6 border-t border-gold/10">
                 <button
                   onClick={handleNavigate}
-                  disabled={loadingRoute}
                   className="w-full flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white dark:text-neutralDark font-sans font-semibold tracking-luxury uppercase py-4 rounded border border-gold transition-all duration-300 hover:shadow-lg hover:shadow-gold/15"
                 >
-                  <Navigation size={18} className={loadingRoute ? "animate-spin" : ""} />
-                  {loadingRoute ? "Pobieranie pozycji..." : "Nawiguj do lokalu"}
+                  <Navigation size={18} />
+                  Nawiguj do lokalu
                 </button>
                 <p className="text-[10px] font-sans text-center text-primary/50 dark:text-neutralDark-text/50 mt-2 font-light">
-                  Używa nawigacji GPS do wyznaczenia trasy z Twojej obecnej lokalizacji.
+                  Otwiera trasę w Mapach Google z Twojej obecnej lokalizacji.
                 </p>
               </div>
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Phone, Lock, User as UserIcon } from 'lucide-react';
 import type { User } from '../types';
+import { isValidPhone } from '../utils/validation';
 
 interface AuthProps {
   isOpen: boolean;
@@ -18,35 +19,71 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
+  // Sync mode with the button that opened the dialog and start from a clean form each time
+  useEffect(() => {
+    if (!isOpen) return;
+    setMode(initialMode);
+    setUsernameOrEmail('');
+    setEmail('');
+    setPhone('');
+    setPassword('');
+    setError('');
+  }, [isOpen, initialMode]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   // Handle Submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (mode === 'signup') {
-      if (!usernameOrEmail || !email || !phone || !password) {
+      const username = usernameOrEmail.trim();
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!username || !normalizedEmail || !phone || !password) {
         setError('Proszę wypełnić wszystkie pola.');
         return;
       }
+      if (username.includes('@')) {
+        setError('Nazwa użytkownika nie może zawierać znaku @.');
+        return;
+      }
+      if (!isValidPhone(phone)) {
+        setError('Podaj poprawny numer telefonu (9 cyfr, opcjonalnie z +48).');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Hasło musi mieć co najmniej 6 znaków.');
+        return;
+      }
 
-      // Check if email already exists
-      const existingUser = localStorage.getItem(`user_${email}`);
-      if (existingUser) {
+      // Check if email or username already exists
+      if (localStorage.getItem(`user_${normalizedEmail}`)) {
         setError('Użytkownik o podanym adresie email już istnieje.');
+        return;
+      }
+      if (localStorage.getItem(`username_${username.toLowerCase()}`)) {
+        setError('Ta nazwa użytkownika jest już zajęta.');
         return;
       }
 
       const newUser: User = {
-        username: usernameOrEmail,
-        email: email,
-        phone: phone,
+        username,
+        email: normalizedEmail,
+        phone: phone.trim(),
         createdAt: new Date().toISOString(),
       };
 
       // Store in localStorage
-      localStorage.setItem(`user_${email}`, JSON.stringify({ ...newUser, password }));
+      localStorage.setItem(`user_${normalizedEmail}`, JSON.stringify({ ...newUser, password }));
       // Store index by username too
-      localStorage.setItem(`username_${usernameOrEmail}`, email);
+      localStorage.setItem(`username_${username.toLowerCase()}`, normalizedEmail);
 
       onLoginSuccess(newUser);
       onClose();
@@ -57,9 +94,10 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
       }
 
       // Resolve email if username was provided
-      let resolvedEmail = usernameOrEmail;
-      if (!usernameOrEmail.includes('@')) {
-        const foundEmail = localStorage.getItem(`username_${usernameOrEmail}`);
+      const login = usernameOrEmail.trim().toLowerCase();
+      let resolvedEmail = login;
+      if (!login.includes('@')) {
+        const foundEmail = localStorage.getItem(`username_${login}`) ?? localStorage.getItem(`username_${usernameOrEmail.trim()}`);
         if (!foundEmail) {
           setError('Nieprawidłowe dane logowania.');
           return;
@@ -67,15 +105,12 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
         resolvedEmail = foundEmail;
       }
 
-      const userRaw = localStorage.getItem(`user_${resolvedEmail}`);
-      if (!userRaw) {
-        setError('Użytkownik nie istnieje.');
-        return;
-      }
-
-      const userData = JSON.parse(userRaw);
-      if (userData.password !== password) {
-        setError('Niepoprawne hasło.');
+      // Accounts created before emails were lowercased are stored under the original spelling
+      const userRaw = localStorage.getItem(`user_${resolvedEmail}`) ?? localStorage.getItem(`user_${usernameOrEmail.trim()}`);
+      const userData = userRaw ? JSON.parse(userRaw) : null;
+      // Same message for unknown user and wrong password, so the form doesn't reveal which accounts exist
+      if (!userData || userData.password !== password) {
+        setError('Nieprawidłowe dane logowania.');
         return;
       }
 
@@ -94,7 +129,7 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="auth-title">
           {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -114,7 +149,9 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
           >
             {/* Close Button */}
             <button
+              type="button"
               onClick={onClose}
+              aria-label="Zamknij"
               className="absolute top-4 right-4 text-primary/60 dark:text-neutralDark-text/60 hover:text-gold dark:hover:text-gold transition-colors duration-200"
             >
               <X size={20} />
@@ -122,7 +159,7 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
 
             {/* Modal Title */}
             <div className="text-center mb-8">
-              <h2 className="font-serif text-3xl text-primary dark:text-gold font-light tracking-wide uppercase">
+              <h2 id="auth-title" className="font-serif text-3xl text-primary dark:text-gold font-light tracking-wide uppercase">
                 {mode === 'login' ? 'Zaloguj się' : 'Stwórz konto'}
               </h2>
               <p className="font-sans text-xs text-primary/60 dark:text-neutralDark-text/60 mt-2 tracking-wider">
@@ -133,7 +170,7 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-sans text-sm">
               {error && (
-                <div className="bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2.5 rounded text-xs">
+                <div role="alert" className="bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2.5 rounded text-xs">
                   {error}
                 </div>
               )}
@@ -148,10 +185,12 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                   <input
                     type="text"
                     required
+                    autoFocus
+                    autoComplete="username"
                     value={usernameOrEmail}
                     onChange={(e) => setUsernameOrEmail(e.target.value)}
                     className="w-full bg-neutralLight-alt dark:bg-neutralDark-alt text-primary dark:text-neutralDark-text border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none pl-11 pr-4 py-3 rounded transition-all duration-300 shadow-inner"
-                    placeholder={mode === 'login' ? 'e.g. jan_kowalski' : 'e.g. jan_kowalski'}
+                    placeholder={mode === 'login' ? 'np. jan_kowalski lub jan@example.com' : 'np. jan_kowalski'}
                   />
                 </div>
               </div>
@@ -167,10 +206,11 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                     <input
                       type="email"
                       required
+                      autoComplete="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-neutralLight-alt dark:bg-neutralDark-alt text-primary dark:text-neutralDark-text border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none pl-11 pr-4 py-3 rounded transition-all duration-300 shadow-inner"
-                      placeholder="e.g. jan@example.com"
+                      placeholder="np. jan@example.com"
                     />
                   </div>
                 </div>
@@ -187,10 +227,11 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                     <input
                       type="tel"
                       required
+                      autoComplete="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="w-full bg-neutralLight-alt dark:bg-neutralDark-alt text-primary dark:text-neutralDark-text border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none pl-11 pr-4 py-3 rounded transition-all duration-300 shadow-inner"
-                      placeholder="e.g. +48 123 456 789"
+                      placeholder="np. 500 600 700"
                     />
                   </div>
                 </div>
@@ -206,6 +247,8 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                   <input
                     type="password"
                     required
+                    minLength={mode === 'signup' ? 6 : undefined}
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-neutralLight-alt dark:bg-neutralDark-alt text-primary dark:text-neutralDark-text border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none pl-11 pr-4 py-3 rounded transition-all duration-300 shadow-inner"

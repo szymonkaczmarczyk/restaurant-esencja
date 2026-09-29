@@ -48,6 +48,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
   // Cancel reservation
   const handleCancelReservation = (resId: string) => {
     if (!currentUser) return;
+    const cancelled = reservations.find(res => res.id === resId);
+    if (!cancelled) return;
+    if (!window.confirm(`Anulować rezerwację: ${cancelled.tableName}, ${cancelled.date.split('-').reverse().join('.')} o ${cancelled.timeSlot}?`)) return;
 
     // Filter from user list
     const updatedUserRes = reservations.filter(res => res.id !== resId);
@@ -63,8 +66,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
     // Add refund transaction simulation
     const refundTransaction: Transaction = {
       id: `RF-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-      description: `Zwrot Kaucji - Anulowano Rezerwację`,
-      amount: -50,
+      description: `Zwrot Kaucji - ${cancelled.tableName}`,
+      // Refund exactly what was charged at booking (50 zł per guest)
+      amount: -cancelled.guestsCount * 50,
       date: new Date().toLocaleDateString('pl-PL'),
       status: 'Zwrócono'
     };
@@ -173,7 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
                           {res.tableName}
                         </span>
                         <div className="font-serif text-xl text-primary dark:text-gold font-light mt-0.5">
-                          Termin: {res.date} r. o godz. {res.timeSlot}
+                          Termin: {res.date.split('-').reverse().join('.')} r. o godz. {res.timeSlot}
                         </div>
                         <div className="font-sans text-xs text-primary/60 dark:text-neutralDark-text/60 flex items-center gap-4 mt-1.5 justify-center md:justify-start">
                           <span>Goście: {res.guestsCount} {res.guestsCount === 1 ? 'osoba' : res.guestsCount < 5 ? 'osoby' : 'osób'}</span>

@@ -1,13 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Users, Clock, Info, CheckCircle2, User as UserIcon, Phone, Mail, X } from 'lucide-react';
 import type { User, Reservation as ReservationData } from '../types';
 import canvasConfetti from 'canvas-confetti';
+import { isValidPhone, isValidEmail } from '../utils/validation';
 
 interface ReservationProps {
   currentUser: User | null;
   onOpenAuth: (mode: 'login' | 'signup') => void;
 }
+
+const TIME_SLOTS = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+const DEPOSIT_PER_GUEST = 50;
+
+// "18:00" -> minutes since midnight; "2.5h" -> minutes
+const slotToMinutes = (slot: string) => { const [h, m] = slot.split(':').map(Number); return h * 60 + m; };
+const durationToMinutes = (d?: string) => Math.round(parseFloat(d || '2h') * 60);
+
+// Local calendar date as YYYY-MM-DD (toISOString would use UTC and be off by a day around midnight)
+const localDateString = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const readReservations = (): ReservationData[] => {
+  try { return JSON.parse(localStorage.getItem('esencja_all_reservations') || '[]'); } catch { return []; }
+};
 
 interface TableLayout {
   id: string;
@@ -35,6 +50,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
   const [bookedTableIds, setBookedTableIds] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const formPanelRef = useRef<HTMLDivElement>(null);
 
   const tables: TableLayout[] = [
     { id: 'T1', name: 'Stolik dwuosobowy T1', capacity: 2, x: 60, y: 75, width: 55, height: 55, rx: 6 },
@@ -53,28 +69,51 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
   }, [currentUser]);
 
   useEffect(() => {
-    const raw = localStorage.getItem('esencja_all_reservations');
-    setReservations(raw ? JSON.parse(raw) : []);
-  }, [successMessage]);
+    setReservations(readReservations());
+  }, []);
 
+  // A table is taken when an existing booking overlaps the chosen slot + duration
   useEffect(() => {
     if (date && timeSlot) {
-      const booked = reservations.filter(r => r.date === date && r.timeSlot === timeSlot).map(r => r.tableId);
+      const start = slotToMinutes(timeSlot);
+      const end = start + durationToMinutes(duration);
+      const booked = reservations
+        .filter(r => r.date === date)
+        .filter(r => {
+          const rStart = slotToMinutes(r.timeSlot);
+          const rEnd = rStart + durationToMinutes(r.duration);
+          return start < rEnd && rStart < end;
+        })
+        .map(r => r.tableId);
       setBookedTableIds(booked);
-      if (selectedTable && booked.includes(selectedTable.id)) setSelectedTable(null);
+      setSelectedTable(prev => (prev && booked.includes(prev.id) ? null : prev));
     } else { setBookedTableIds([]); }
-  }, [date, timeSlot, reservations]);
+  }, [date, timeSlot, duration, reservations]);
+
+  // Hide slots that have already started when booking for today
+  const today = localDateString();
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+  const availableSlots = date === today ? TIME_SLOTS.filter(t => slotToMinutes(t) > nowMinutes) : TIME_SLOTS;
+
+  useEffect(() => {
+    if (timeSlot && !availableSlots.includes(timeSlot)) setTimeSlot('');
+  }, [date]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTableClick = (table: TableLayout) => {
     if (bookedTableIds.includes(table.id)) return;
     setSelectedTable(table);
     setGuestsCount(table.capacity);
+    setErrors({});
+    // On narrow screens the form sits below the plan: bring it into view
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      setTimeout(() => formPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
   };
 
   const validateForm = () => {
     const e: Record<string, string> = {};
-    if (!/^[0-9]{9}$/.test(phone.replace(/\s+/g, ''))) e.phone = 'Numer telefonu musi składać się z dokładnie 9 cyfr.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Podaj poprawny adres e-mail.';
+    if (!isValidPhone(phone)) e.phone = 'Podaj 9-cyfrowy numer telefonu (opcjonalnie z +48).';
+    if (!isValidEmail(email)) e.email = 'Podaj poprawny adres e-mail.';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -83,19 +122,33 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
     ev.preventDefault();
     if (!selectedTable || !date || !timeSlot || !validateForm()) return;
 
+    // Re-check against the latest stored bookings (another tab may have booked meanwhile)
+    const latest = readReservations();
+    const start = slotToMinutes(timeSlot);
+    const end = start + durationToMinutes(duration);
+    const clash = latest.some(r => r.tableId === selectedTable.id && r.date === date
+      && start < slotToMinutes(r.timeSlot) + durationToMinutes(r.duration) && slotToMinutes(r.timeSlot) < end);
+    if (clash) {
+      setReservations(latest);
+      setErrors({ table: 'Ten stolik został właśnie zarezerwowany. Wybierz inny.' });
+      return;
+    }
+
     const res: ReservationData = {
       id: Math.random().toString(36).substring(2, 9), tableId: selectedTable.id, tableName: selectedTable.name,
       date, timeSlot, duration, guestsCount, customerName: name, customerPhone: phone, notes, createdAt: new Date().toISOString(),
     };
 
-    const targetEmail = currentUser ? currentUser.email : email;
+    const targetEmail = currentUser ? currentUser.email : email.trim().toLowerCase();
     const userRes = JSON.parse(localStorage.getItem(`reservations_${targetEmail}`) || '[]');
     localStorage.setItem(`reservations_${targetEmail}`, JSON.stringify([res, ...userRes]));
-    localStorage.setItem('esencja_all_reservations', JSON.stringify([res, ...reservations]));
+    const updated = [res, ...latest];
+    localStorage.setItem('esencja_all_reservations', JSON.stringify(updated));
+    setReservations(updated);
 
     if (currentUser) {
       const hist = JSON.parse(localStorage.getItem(`history_${currentUser.email}`) || '[]');
-      hist.unshift({ id: `TX-${Math.random().toString(36).substring(2, 9).toUpperCase()}`, description: `Rezerwacja - ${selectedTable.name}`, amount: guestsCount * 50, date: new Date().toLocaleDateString('pl-PL'), status: 'Opłacona (Kaucja)' });
+      hist.unshift({ id: `TX-${Math.random().toString(36).substring(2, 9).toUpperCase()}`, description: `Rezerwacja - ${selectedTable.name}`, amount: guestsCount * DEPOSIT_PER_GUEST, date: new Date().toLocaleDateString('pl-PL'), status: 'Opłacona (Kaucja)' });
       localStorage.setItem(`history_${currentUser.email}`, JSON.stringify(hist));
     }
 
@@ -138,13 +191,13 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-6 glass-light border border-gold/15 rounded shadow-lg">
               <div>
                 <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2.5 flex items-center gap-1.5 font-medium"><Calendar size={14} className="text-gold" /> Data Wizyty</label>
-                <input type="date" required min={new Date().toISOString().split('T')[0]} value={date} onChange={e => setDate(e.target.value)} className="w-full bg-neutralLight-alt text-primary border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none p-3.5 rounded font-sans text-sm transition-all duration-300 shadow-inner" />
+                <input type="date" required min={today} value={date} onChange={e => setDate(e.target.value)} className="w-full bg-neutralLight-alt text-primary border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none p-3.5 rounded font-sans text-sm transition-all duration-300 shadow-inner" />
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2.5 flex items-center gap-1.5 font-medium"><Clock size={14} className="text-gold" /> Godzina</label>
                 <select required value={timeSlot} onChange={e => setTimeSlot(e.target.value)} className="w-full bg-neutralLight-alt text-primary border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none p-3.5 rounded font-sans text-sm transition-all duration-300 shadow-inner appearance-none cursor-pointer" style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg fill=\'%23B59A57\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>")', backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', paddingRight: '40px' }}>
-                  <option value="">Wybierz godzinę</option>
-                  {['12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(t => <option key={t} value={t}>{t}</option>)}
+                  <option value="">{availableSlots.length ? 'Wybierz godzinę' : 'Brak wolnych godzin dziś'}</option>
+                  {availableSlots.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
@@ -156,7 +209,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
             </div>
 
             {/* Map */}
-            <div className="relative glass-light border border-gold/15 rounded p-6 flex flex-col justify-between shadow-lg transition-all duration-300 flex-grow min-h-[520px]">
+            <div className="relative glass-light border border-gold/15 rounded p-6 flex flex-col justify-between shadow-lg transition-all duration-300 flex-grow min-h-[360px] lg:min-h-[520px]">
               {!date || !timeSlot ? (
                 <div className="absolute inset-0 bg-neutralLight/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 z-20">
                   <Info className="text-gold mb-3 animate-pulse" size={32} />
@@ -165,8 +218,8 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                 </div>
               ) : null}
 
-              <div className="w-full flex-grow flex items-center justify-center">
-                <svg viewBox="0 0 900 520" className="w-full h-full select-none">
+              <div className="w-full flex-grow flex items-center lg:justify-center overflow-x-auto">
+                <svg viewBox="0 0 900 520" className="w-full min-w-[720px] lg:min-w-0 h-full select-none" role="img" aria-label="Plan sali restauracji z dostępnością stolików">
 
                   {/* ========== ROOM FILLS ========== */}
                   <rect x="630" y="30" width="240" height="300" fill="#B59A57" opacity="0.04" />
@@ -250,7 +303,17 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                     const txt = isSelected ? '#F9F8F3' : isBooked ? '#991B1B' : '#2C3531';
 
                     return (
-                      <g key={table.id} onClick={() => handleTableClick(table)} className={`${isBooked ? 'cursor-not-allowed' : 'cursor-pointer'} transition-all duration-300`}>
+                      <g
+                        key={table.id}
+                        onClick={() => handleTableClick(table)}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTableClick(table); } }}
+                        role="button"
+                        tabIndex={isBooked ? -1 : 0}
+                        aria-disabled={isBooked}
+                        aria-pressed={isSelected}
+                        aria-label={`${table.name}, ${table.capacity} os.${isBooked ? ' — zajęty' : ''}`}
+                        className={`${isBooked ? 'cursor-not-allowed' : 'cursor-pointer'} transition-all duration-300 outline-none focus-visible:[&>rect:first-child]:stroke-[3]`}
+                      >
                         <rect x={table.x} y={table.y} width={table.width} height={table.height} rx={table.rx || 0} fill={fill} stroke={stroke} strokeWidth={isSelected ? 2.5 : 1.5} />
 
                         {table.capacity === 2 && (<>
@@ -303,7 +366,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
           </div>
 
           {/* Form Panel */}
-          <div className="lg:col-span-4 h-full flex flex-col justify-between">
+          <div ref={formPanelRef} className="lg:col-span-4 h-full flex flex-col justify-between scroll-mt-24">
             <AnimatePresence mode="wait">
               {successMessage ? (
                 <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="p-8 glass-light border border-emerald-500/20 rounded shadow-xl text-center flex flex-col items-center gap-4 h-full justify-center">
@@ -360,6 +423,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                     ) : (
                       <div className="py-16 text-center text-primary/50 font-light flex flex-col items-center justify-center gap-2">
                         <Info size={24} className="text-gold/50" />
+                        {errors.table && <p role="alert" className="font-sans text-xs text-red-500">{errors.table}</p>}
                         <p className="font-sans text-xs">Wybierz wolny stolik na planie sali, aby wypełnić formularz rezerwacji.</p>
                       </div>
                     )}

@@ -10,8 +10,36 @@ import { Auth } from './components/Auth';
 import type { User } from './types';
 import './App.css';
 
+// Each tab gets a URL hash so back/forward, refresh and shared links work
+const TAB_HASHES: Record<string, string> = {
+  home: '',
+  menu: 'menu',
+  reservation: 'rezerwacja',
+  contact: 'kontakt',
+  dashboard: 'panel',
+};
+
+const tabFromHash = (hash: string) => {
+  const slug = hash.replace(/^#\/?/, '');
+  return Object.keys(TAB_HASHES).find(tab => TAB_HASHES[tab] === slug) ?? 'home';
+};
+
 function App() {
-  const [activeTab, setActiveTab] = useState<string>('home');
+  const [activeTab, setActiveTabState] = useState<string>(() => tabFromHash(window.location.hash));
+
+  const setActiveTab = (tab: string) => {
+    const hash = TAB_HASHES[tab] ?? '';
+    if (tabFromHash(window.location.hash) !== tab) {
+      window.history.pushState(null, '', hash ? `#${hash}` : window.location.pathname + window.location.search);
+    }
+    setActiveTabState(tab);
+  };
+
+  useEffect(() => {
+    const onPop = () => setActiveTabState(tabFromHash(window.location.hash));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -32,8 +60,14 @@ function App() {
       } catch (e) {
         console.error("Failed parsing user session", e);
       }
+    } else if (activeTab === 'dashboard') {
+      // #panel opened without a session: send the visitor home and offer login
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      setActiveTabState('home');
+      setAuthMode('login');
+      setIsAuthOpen(true);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to top on page navigation
   useEffect(() => {

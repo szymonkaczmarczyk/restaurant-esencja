@@ -8,7 +8,6 @@ import { Dashboard } from './components/Dashboard';
 import { ContactMap } from './components/ContactMap';
 import { Auth } from './components/Auth';
 import type { User } from './types';
-import './App.css';
 
 // Each tab gets a URL hash so back/forward, refresh and shared links work
 const TAB_HASHES: Record<string, string> = {

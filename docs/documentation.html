@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Esencja — dokumentacja techniczna</title>
+<title>Esencja – dokumentacja techniczna</title>
 <style>
   :root {
     --ink: #1f2937;
@@ -111,10 +111,10 @@
 <body>
 <main>
 
-<h1>Esencja — dokumentacja techniczna</h1>
+<h1>Esencja – dokumentacja techniczna</h1>
 <p class="lead">
   Strona i system rezerwacji stolików restauracji Esencja (Warszawa).<br>
-  Aplikacja jednostronicowa: React 19 + TypeScript + Vite + Tailwind CSS 4. Bez backendu — dane kont,
+  Aplikacja jednostronicowa: React 19 + TypeScript + Vite + Tailwind CSS 4. Bez backendu - dane kont,
   rezerwacji, ulubionych i ocen są zapisywane w <code>localStorage</code> przeglądarki.<br>
   Widoki: <code>#</code> (start), <code>#menu</code>, <code>#rezerwacja</code>, <code>#kontakt</code>, <code>#panel</code>
 </p>
@@ -139,13 +139,14 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
   <li><a href="#menu">Karta menu</a></li>
   <li><a href="#limits">Bezpieczeństwo i ograniczenia</a></li>
   <li><a href="#e2e">Raport testów e2e</a></li>
+  <li><a href="#repo">Repozytorium i licencja</a></li>
 </ol>
 
 <section id="arch">
   <h2>Architektura</h2>
   <p>
     Cała aplikacja działa w przeglądarce. <code>App.tsx</code> trzyma aktywny widok i zalogowanego użytkownika,
-    a każdy widok jest osobnym komponentem w <code>src/components/</code>. Nie ma serwera ani bazy danych —
+    a każdy widok jest osobnym komponentem w <code>src/components/</code>. Nie ma serwera ani bazy danych -
     trwałe dane to klucze <code>localStorage</code> opisane dalej, jeden zestaw na przeglądarkę.
   </p>
 <pre>index.html ─► main.tsx ─► App.tsx   (activeTab ⇄ location.hash, currentUser)
@@ -184,7 +185,7 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
     <tr><td><code>/#menu</code></td><td>Karta menu</td><td>publiczny; ulubione i oceny po zalogowaniu</td></tr>
     <tr><td><code>/#rezerwacja</code></td><td>Plan sali i formularz rezerwacji</td><td>publiczny (rezerwacja jako gość lub z konta)</td></tr>
     <tr><td><code>/#kontakt</code></td><td>Lokalizacja i kontakt</td><td>publiczny</td></tr>
-    <tr><td><code>/#panel</code></td><td>Panel klienta</td><td>wymaga sesji — bez niej przekierowanie na start i otwarcie logowania</td></tr>
+    <tr><td><code>/#panel</code></td><td>Panel klienta</td><td>wymaga sesji - bez niej przekierowanie na start i otwarcie logowania</td></tr>
   </table>
   <p class="note">Nieznany hash otwiera stronę startową.</p>
 </section>
@@ -194,7 +195,7 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
   <p>
     Konto zakłada się w modalu „Stwórz konto” (przycisk <em>Zarejestruj</em> w nawigacji lub w monicie po
     rezerwacji gościa). Po rejestracji użytkownik jest od razu zalogowany. Logować się można adresem e-mail
-    albo nazwą użytkownika — wielkość liter nie ma znaczenia.
+    albo nazwą użytkownika - wielkość liter nie ma znaczenia.
   </p>
   <h4>Pola rejestracji</h4>
   <table>
@@ -262,7 +263,7 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
     <tr><th>Klucz</th><th>Opis</th></tr>
     <tr><td><code>username</code></td><td>Nazwa wyświetlana w nawigacji i panelu.</td></tr>
     <tr><td><code>email</code></td><td>Identyfikator konta (małe litery); część nazw kluczy <code>*_{email}</code>.</td></tr>
-    <tr><td><code>phone</code></td><td>Telefon — wstępnie wypełnia formularz rezerwacji.</td></tr>
+    <tr><td><code>phone</code></td><td>Telefon - wstępnie wypełnia formularz rezerwacji.</td></tr>
     <tr><td><code>createdAt</code></td><td>Data utworzenia konta.</td></tr>
   </table>
   <h3>Obiekt Reservation</h3>
@@ -276,12 +277,12 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
   "guestsCount": 4,
   "customerName": "Anna Przykładowa",
   "customerPhone": "500 600 700",
-  "notes": "Rocznica — prosimy o spokojny stolik.",
+  "notes": "Rocznica - prosimy o spokojny stolik.",
   "createdAt": "2026-09-29T14:03:12.511Z"
 }</pre>
   <table>
     <tr><th>Klucz</th><th>Opis</th></tr>
-    <tr><td><code>tableId</code></td><td>Jeden z: <code>T1</code>, <code>T2</code>, <code>T3</code>, <code>T4</code>, <code>C1</code>, <code>C2</code>, <code>T7</code>, <code>V1</code> — patrz <a href="#rules">plan sali</a>.</td></tr>
+    <tr><td><code>tableId</code></td><td>Jeden z: <code>T1</code>, <code>T2</code>, <code>T3</code>, <code>T4</code>, <code>C1</code>, <code>C2</code>, <code>T7</code>, <code>V1</code> - patrz <a href="#rules">plan sali</a>.</td></tr>
     <tr><td><code>date</code>, <code>timeSlot</code>, <code>duration</code></td><td>Termin; razem wyznaczają przedział blokujący stolik.</td></tr>
     <tr><td><code>guestsCount</code></td><td>1 … pojemność stolika. Podstawa kaucji (50 zł za osobę).</td></tr>
     <tr><td><code>notes</code></td><td>Opcjonalne uwagi (alergie, preferencje).</td></tr>
@@ -335,17 +336,17 @@ localStorage["username_anna_demo"] = "anna.demo@example.com"</pre>
   <h4>Znaczenie kluczy</h4>
   <table>
     <tr><th>Klucz</th><th>Opis</th></tr>
-    <tr><td><code>user_{email}</code></td><td>Obiekt User + <code>password</code> (jawnym tekstem — patrz <a href="#limits">ograniczenia</a>).</td></tr>
+    <tr><td><code>user_{email}</code></td><td>Obiekt User + <code>password</code> (jawnym tekstem - patrz <a href="#limits">ograniczenia</a>).</td></tr>
     <tr><td><code>username_{login}</code></td><td>Tekst: e-mail konta. Pozwala logować się nazwą.</td></tr>
   </table>
-  <p class="note">Konta zapisane przed poprawką (z e-mailem lub nazwą z wielkimi literami) nadal się logują — kod sprawdza też oryginalną pisownię nazwy.</p>
+  <p class="note">Konta zapisane przed poprawką (z e-mailem lub nazwą z wielkimi literami) nadal się logują - kod sprawdza też oryginalną pisownię nazwy.</p>
 </section>
 
 <section id="k-session">
   <h2>Sesja: esencja_active_user</h2>
   <div class="endpoint">
     <div class="endpoint__line"><span class="badge badge--post">ZAPIS</span><code>esencja_active_user</code></div>
-    <p>Po udanym logowaniu lub rejestracji — obiekt User bez hasła. Odczytywany przy starcie aplikacji.</p>
+    <p>Po udanym logowaniu lub rejestracji - obiekt User bez hasła. Odczytywany przy starcie aplikacji.</p>
   </div>
   <div class="endpoint">
     <div class="endpoint__line"><span class="badge badge--delete">USUNIĘCIE</span><code>esencja_active_user</code></div>
@@ -353,7 +354,7 @@ localStorage["username_anna_demo"] = "anna.demo@example.com"</pre>
   </div>
 <pre>localStorage["esencja_active_user"] =
 {"username":"anna_demo","email":"anna.demo@example.com","phone":"+48 500 600 700","createdAt":"2026-09-29T14:00:00.284Z"}</pre>
-  <p class="note">Klucz <code>theme</code> jest ustawiany na <code>light</code> przy starcie — strona ma tylko jasny motyw, niezależnie od ustawień systemu.</p>
+  <p class="note">Klucz <code>theme</code> jest ustawiany na <code>light</code> przy starcie - strona ma tylko jasny motyw, niezależnie od ustawień systemu.</p>
 </section>
 
 <section id="k-all" class="page">
@@ -379,7 +380,7 @@ localStorage["username_anna_demo"] = "anna.demo@example.com"</pre>
     <tr><td><code>guestsCount</code></td><td>nie</td><td>Domyślnie pojemność stolika.</td></tr>
     <tr><td><code>notes</code></td><td>nie</td><td>Uwagi.</td></tr>
   </table>
-  <h4>Odpowiedź — sukces</h4>
+  <h4>Odpowiedź – sukces</h4>
   <p>
     Zalogowany: panel „Potwierdzono!” z przyciskiem „Nowa rezerwacja”. Gość: modal „Rezerwacja zapisana!”
     z zachętą do założenia konta. W obu przypadkach animacja konfetti, a stolik od razu jest oznaczony jako zajęty.
@@ -395,7 +396,7 @@ localStorage["username_anna_demo"] = "anna.demo@example.com"</pre>
   <h2>reservations_{email}</h2>
   <div class="endpoint">
     <div class="endpoint__line"><span class="badge badge--post">ZAPIS</span><code>reservations_{email}</code></div>
-    <p>Kopia rezerwacji przypisana do e-maila — konta zalogowanego lub adresu podanego przez gościa (małe litery). Gość, który później założy konto na ten sam e-mail, zobaczy ją w panelu.</p>
+    <p>Kopia rezerwacji przypisana do e-maila - konta zalogowanego lub adresu podanego przez gościa (małe litery). Gość, który później założy konto na ten sam e-mail, zobaczy ją w panelu.</p>
   </div>
   <div class="endpoint">
     <div class="endpoint__line"><span class="badge badge--get">ODCZYT</span><code>reservations_{email}</code><span class="lock">wymaga sesji</span></div>
@@ -403,7 +404,7 @@ localStorage["username_anna_demo"] = "anna.demo@example.com"</pre>
   </div>
 <pre>Termin: 15.10.2026 r. o godz. 19:00
 Goście: 4 osoby     Czas trwania: 2h
-Uwagi: Rocznica — prosimy o spokojny stolik.</pre>
+Uwagi: Rocznica - prosimy o spokojny stolik.</pre>
 </section>
 
 <section id="k-cancel">
@@ -423,7 +424,7 @@ Uwagi: Rocznica — prosimy o spokojny stolik.</pre>
   <h2>history_{email}</h2>
   <div class="endpoint">
     <div class="endpoint__line"><span class="badge badge--post">ZAPIS</span><code>history_{email}</code><span class="lock">tylko zalogowani</span></div>
-    <p>Symulacja płatności: rezerwacja z konta dopisuje kaucję <code>guestsCount × 50 zł</code>, anulowanie — zwrot tej samej kwoty. Rezerwacje gości nie tworzą transakcji.</p>
+    <p>Symulacja płatności: rezerwacja z konta dopisuje kaucję <code>guestsCount × 50 zł</code>, anulowanie - zwrot tej samej kwoty. Rezerwacje gości nie tworzą transakcji.</p>
   </div>
   <div class="endpoint">
     <div class="endpoint__line"><span class="badge badge--get">ODCZYT</span><code>history_{email}</code><span class="lock">wymaga sesji</span></div>
@@ -447,7 +448,7 @@ Uwagi: Rocznica — prosimy o spokojny stolik.</pre>
         </table>
       </td></tr>
   </table>
-  <p class="note">Nie ma prawdziwej bramki płatności — transakcje są wyłącznie zapisem w przeglądarce.</p>
+  <p class="note">Nie ma prawdziwej bramki płatności - transakcje są wyłącznie zapisem w przeglądarce.</p>
 </section>
 
 <section id="k-favs" class="page">
@@ -482,7 +483,7 @@ localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "
       Przykład: T3 zarezerwowany 19:00 na 2 h jest zajęty o 19:00 i 20:00, wolny o 21:00.</li>
     <li>Wybór stolika ustawia liczbę gości na jego pojemność (można zmniejszyć).</li>
     <li>Zmiana czasu trwania na taki, który koliduje z inną rezerwacją, odznacza stolik.</li>
-    <li>Przy zapisie lista jest czytana ponownie — jeśli ktoś w innej karcie zajął stolik, pojawia się błąd <code>table</code>.</li>
+    <li>Przy zapisie lista jest czytana ponownie - jeśli ktoś w innej karcie zajął stolik, pojawia się błąd <code>table</code>.</li>
     <li>Na telefonie plan można przewijać w poziomie, a po wybraniu stolika strona przewija się do formularza.</li>
   </ol>
   <table>
@@ -501,7 +502,7 @@ localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "
     <tr><td>Pt–Sob</td><td>12:00–23:30</td></tr>
     <tr><td>Niedziela</td><td>12:00–21:00</td></tr>
   </table>
-  <p class="note">Sloty rezerwacji nie są jeszcze powiązane z godzinami otwarcia — patrz <a href="#e2e">lista do poprawy</a>.</p>
+  <p class="note">Sloty rezerwacji nie są jeszcze powiązane z godzinami otwarcia - patrz <a href="#e2e">lista do poprawy</a>.</p>
 </section>
 
 <section id="menu" class="page">
@@ -527,16 +528,16 @@ localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "
 <section id="limits" class="page">
   <h2>Bezpieczeństwo i ograniczenia</h2>
   <p>
-    Esencja to prototyp front-endu. Przed użyciem z prawdziwymi gośćmi potrzebny jest backend — obecne
+    Esencja to prototyp front-endu. Przed użyciem z prawdziwymi gośćmi potrzebny jest backend - obecne
     rozwiązanie nadaje się do prezentacji, nie do obsługi rezerwacji.
   </p>
   <table>
     <tr><th>Obszar</th><th>Stan</th></tr>
     <tr><td>Hasła</td><td>Zapisywane jawnym tekstem w <code>localStorage</code>. Każdy skrypt na stronie i każdy, kto ma dostęp do przeglądarki, może je odczytać.</td></tr>
     <tr><td>Rezerwacje</td><td>Widoczne tylko w przeglądarce, w której powstały. Restauracja ich nie dostaje, dwa urządzenia mogą zarezerwować ten sam stolik.</td></tr>
-    <tr><td>Płatności</td><td>Symulowane — brak bramki płatniczej.</td></tr>
+    <tr><td>Płatności</td><td>Symulowane - brak bramki płatniczej.</td></tr>
     <tr><td>Konta</td><td>Brak weryfikacji e-maila i resetu hasła.</td></tr>
-    <tr><td>Treści zewnętrzne</td><td>Zdjęcia z Unsplash, czcionki z Google Fonts, mapa Google w iframe — ładowane z serwerów zewnętrznych (RODO: informacja w polityce prywatności).</td></tr>
+    <tr><td>Treści zewnętrzne</td><td>Zdjęcia z Unsplash, czcionki z Google Fonts, mapa Google w iframe - ładowane z serwerów zewnętrznych (RODO: informacja w polityce prywatności).</td></tr>
     <tr><td>Nawigacja</td><td>Otwiera Mapy Google w nowej karcie; nie pobiera lokalizacji w aplikacji.</td></tr>
   </table>
   <h4>Minimalny backend</h4>
@@ -551,7 +552,7 @@ PUT    /api/me/ratings/:dishId     DELETE /api/me/ratings/:dishId</pre>
 </section>
 
 <section id="e2e" class="page">
-  <h2>Raport testów e2e — 29.09.2026</h2>
+  <h2>Raport testów e2e – 29.09.2026</h2>
   <p>
     Test przeszedł przez każdy widok w Chromium (Playwright) na 1440×900, 1366×650 i 390×844, w jasnym i ciemnym
     motywie systemu, jako gość i jako zalogowany użytkownik. Build produkcyjny, <code>tsc</code> i <code>oxlint</code> przechodzą bez błędów.
@@ -583,25 +584,25 @@ PUT    /api/me/ratings/:dishId     DELETE /api/me/ratings/:dishId</pre>
     <li><strong>Zalogowany użytkownik nie mógł zarezerwować.</strong> Rejestracja podpowiadała <code>+48 123 456 789</code>, a rezerwacja przyjmowała tylko 9 cyfr bez spacji. Wspólna walidacja przyjmuje oba formaty.</li>
     <li><strong>Można było rezerwować minione godziny</strong> dzisiejszego dnia, a data minimalna liczona w UTC dopuszczała wczorajszy dzień po północy.</li>
     <li><strong>Zwrot kaucji zawsze 50 zł</strong>, choć pobierano 50 zł × liczba gości. Anulowanie było też bez potwierdzenia.</li>
-    <li><strong>Ciemny motyw systemu psuł stronę</strong> — Menu, panel i modal robiły się szare z nieczytelnym tekstem (Tailwind 4 wiąże <code>dark:</code> z ustawieniem systemu). Wariant <code>dark:</code> jest teraz przypięty do klasy <code>.dark</code>.</li>
+    <li><strong>Ciemny motyw systemu psuł stronę</strong> - Menu, panel i modal robiły się szare z nieczytelnym tekstem (Tailwind 4 wiąże <code>dark:</code> z ustawieniem systemu). Wariant <code>dark:</code> jest teraz przypięty do klasy <code>.dark</code>.</li>
     <li><strong>Przyciski hero nachodziły na tekst</strong> na ekranach o wysokości ok. 650 px i na telefonie.</li>
     <li><strong>Sekcje „filozofia” i „prestiż”</strong> pokazywały akapit ogromną pogrubioną czcionką (CSS komponentu nadpisywał Tailwinda), akapit był w <code>&lt;h2&gt;</code>, animacja ignorowała „ogranicz ruch”, a sprzątanie zabijało wszystkie ScrollTriggery na stronie.</li>
-    <li><strong>Brak adresów URL</strong> — Wstecz wychodził z serwisu, odświeżenie wracało na start. Dodano routing na hashach.</li>
+    <li><strong>Brak adresów URL</strong> - Wstecz wychodził z serwisu, odświeżenie wracało na start. Dodano routing na hashach.</li>
     <li><strong>Kontakt:</strong> kod pocztowy 00-333 zamiast 00-071 (niezgodny z mapą); „Nawiguj do lokalu” otwierał okno po asynchronicznym GPS, co blokują przeglądarki, i wysyłał współrzędne w URL.</li>
     <li><strong>Modal:</strong> brak zamykania klawiszem Esc, <code>role="dialog"</code>, etykiety przycisku zamknięcia, <code>autocomplete</code>; komunikat logowania zdradzał, czy konto istnieje; placeholdery po angielsku („e.g.”).</li>
     <li><strong>Plan sali</strong> był niedostępny z klawiatury, a na telefonie mikroskopijny; formularz po wyborze stolika zostawał poza ekranem.</li>
     <li><strong>Teksty:</strong> „Cada potrawa” (hiszp.) w opinii, „redukcja z porto i porto” w menu, data ISO w panelu.</li>
-    <li><strong>Brak nagłówka <code>&lt;h1&gt;</code></strong> na stronie głównej — tytuł hero był dwoma akapitami.</li>
+    <li><strong>Brak nagłówka <code>&lt;h1&gt;</code></strong> na stronie głównej - tytuł hero był dwoma akapitami.</li>
   </ol>
 </section>
 
 <section class="page">
   <h2>Lista do poprawy</h2>
-  <p>Rzeczy wykryte w teście, których nie zmieniałem — wymagają decyzji właściciela albo backendu.</p>
+  <p>Rzeczy wykryte w teście, których nie zmieniałem - wymagają decyzji właściciela albo backendu.</p>
   <table>
     <tr><th>Priorytet</th><th>Problem</th><th>Propozycja</th></tr>
     <tr><td class="todo">wysoki</td><td>Brak backendu: rezerwacje i konta tylko w jednej przeglądarce, hasła jawnym tekstem.</td><td>API z sekcji <a href="#limits">ograniczenia</a>; do tego czasu nie reklamować „rezerwacji w czasie rzeczywistym”.</td></tr>
-    <tr><td class="todo">wysoki</td><td>„Michelin Guide — Rekomendacja 2026” i „Champion de Qualité” na stronie startowej oraz imienne opinie gości.</td><td>Zostawić tylko prawdziwe wyróżnienia i opinie (nazwa Michelin jest znakiem towarowym).</td></tr>
+    <tr><td class="todo">wysoki</td><td>„Michelin Guide - Rekomendacja 2026” i „Champion de Qualité” na stronie startowej oraz imienne opinie gości.</td><td>Zostawić tylko prawdziwe wyróżnienia i opinie (nazwa Michelin jest znakiem towarowym).</td></tr>
     <tr><td class="todo">średni</td><td>Zdjęcia nie pasują do dań: tatar z jelenia to miska z tofu, przegrzebki to grillowana ryba, pianka z koziego sera to buddha bowl, polędwica Wagyu to żeberka.</td><td>Własne zdjęcia dań albo trafniej dobrane z Unsplash.</td></tr>
     <tr><td class="todo">średni</td><td>Sloty 12:00–21:00 nie uwzględniają godzin otwarcia: w niedzielę można zarezerwować 21:00 (zamknięcie 21:00), 20:00 na 3 h w poniedziałek kończy się po zamknięciu.</td><td>Sloty i maks. czas trwania wyliczane z dnia tygodnia.</td></tr>
     <tr><td class="todo">średni</td><td>Gość, który później założy konto na ten sam e-mail, może anulować rezerwację i dostać „zwrot” kaucji, której nie wpłacił.</td><td>Zwrot tylko gdy istnieje odpowiadająca kaucja (powiązać transakcję z <code>id</code> rezerwacji).</td></tr>
@@ -609,10 +610,38 @@ PUT    /api/me/ratings/:dishId     DELETE /api/me/ratings/:dishId</pre>
     <tr><td>niski</td><td>Pole „Imię i nazwisko” wypełnia się nazwą użytkownika (<code>anna_demo</code>).</td><td>Osobne pole imienia w koncie.</td></tr>
     <tr><td>niski</td><td>Dwa pola „Liczba gości” (nad planem i w formularzu) sterują tym samym.</td><td>Zostawić jedno.</td></tr>
     <tr><td>niski</td><td>Panel pokazuje minione rezerwacje razem z przyszłymi, bez sortowania.</td><td>Podział „Nadchodzące / Historia”, sortowanie po dacie.</td></tr>
-    <tr><td>niski</td><td>Kaucja pokazana jako <code>+200 zł</code> na zielono — z perspektywy klienta to wydatek.</td><td>Odwrócić znaki lub dodać kolumnę „typ”.</td></tr>
+    <tr><td>niski</td><td>Kaucja pokazana jako <code>+200 zł</code> na zielono - z perspektywy klienta to wydatek.</td><td>Odwrócić znaki lub dodać kolumnę „typ”.</td></tr>
     <tr><td>niski</td><td><code>.oxlintrc.json</code> jest w <code>.gitignore</code>, więc po sklonowaniu repo <code>npm run lint</code> działa na domyślnej konfiguracji.</td><td>Usunąć wpis z <code>.gitignore</code> i dodać plik do repo.</td></tr>
-    <tr><td>niski</td><td>Nieużywane pliki: <code>src/assets/*</code>, <code>public/icons.svg</code>, <code>src/App.css</code>; duplikaty <code>logo.png</code>, <code>icon.png</code>, <code>icon.ico</code> w katalogu głównym. <code>logo.png</code> ma 156 kB przy wyświetlaniu w 40 px.</td><td>Usunąć duplikaty; logo jako SVG lub mały WebP.</td></tr>
+    <tr><td>niski</td><td><code>public/logo.png</code> ma 156 kB przy wyświetlaniu w 40 px.</td><td>Logo jako SVG lub mały WebP.</td></tr>
+    <tr><td class="ok">zrobione</td><td>Nieużywane pliki: <code>src/assets/*</code>, <code>public/icons.svg</code>, <code>src/App.css</code>. Duplikaty <code>logo.png</code>, <code>icon.png</code>, <code>icon.ico</code> w katalogu głównym.</td><td>Usunięte 11.10.2026, szczegóły w sekcji <a href="#repo">repozytorium i licencja</a>.</td></tr>
   </table>
+</section>
+
+<section id="repo" class="page">
+  <h2>Repozytorium i licencja</h2>
+  <h3>Licencja</h3>
+  <p>
+    Kod jest udostępniony na licencji MIT. Pełna treść jest w pliku <code>LICENSE</code> w katalogu głównym:
+    <code>Copyright (c) 2026 Szymon Kaczmarczyk</code>. Licencja pozwala używać, kopiować, zmieniać i rozpowszechniać
+    kod, także komercyjnie, pod warunkiem zachowania informacji o prawach autorskich i treści licencji.
+  </p>
+  <h3>Co nie trafia do repozytorium</h3>
+  <table>
+    <tr><th>Grupa</th><th>Wpisy w <code>.gitignore</code></th></tr>
+    <tr><td>Build i zależności</td><td><code>node_modules/</code>, <code>dist/</code>, <code>dist-ssr/</code>, <code>.vite/</code>, <code>coverage/</code>, <code>*.tsbuildinfo</code>, logi <code>*.log</code></td></tr>
+    <tr><td>Sekrety</td><td><code>.env</code>, <code>.env.*</code> (poza <code>.env.example</code>), <code>*.pem</code>, <code>*.key</code>, <code>*.p12</code>, <code>*.crt</code>, <code>secrets/</code>, <code>credentials*.json</code>, <code>service-account*.json</code></td></tr>
+    <tr><td>Pliki agentów AI</td><td><code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>GEMINI.md</code>, <code>CODEX.md</code>, <code>WARP.md</code>, <code>zasady-projektu.md</code>, <code>.claude/</code>, <code>.agents/</code>, <code>.gemini/</code>, <code>.codex/</code>, <code>.cursor/</code>, <code>.cursorrules</code>, <code>.windsurf/</code>, <code>.clinerules</code>, <code>.aider*</code>, <code>.github/copilot-instructions.md</code>, <code>.mcp.json</code></td></tr>
+    <tr><td>Edytory i system</td><td><code>.vscode/*</code> (poza <code>extensions.json</code>), <code>.idea/</code>, <code>.DS_Store</code>, <code>Thumbs.db</code>, kopie iCloud <code>* 2</code></td></tr>
+  </table>
+  <p class="note">Aplikacja nie używa dziś żadnych kluczy ani zmiennych środowiskowych. Wpisy dla sekretów chronią repozytorium, gdy pojawi się backend z sekcji <a href="#limits">ograniczenia</a>.</p>
+  <h3>Porządki 11.10.2026</h3>
+  <ul>
+    <li>Usunięte nieużywane pliki z szablonu Vite: <code>src/assets/hero.png</code>, <code>src/assets/react.svg</code>, <code>src/assets/vite.svg</code>, <code>public/icons.svg</code>.</li>
+    <li>Usunięty pusty <code>src/App.css</code> razem z importem w <code>App.tsx</code>.</li>
+    <li>Usunięte kopie <code>icon.ico</code>, <code>icon.png</code>, <code>logo.png</code> z katalogu głównego. Identyczne pliki (zgodne sumy md5) zostają w <code>public/</code>.</li>
+    <li>Dodany plik <code>LICENSE</code> i sekcja „Licencja” w README.</li>
+  </ul>
+  <p>Build (<code>npm run build</code>) przechodzi po zmianach.</p>
 </section>
 
 </main>

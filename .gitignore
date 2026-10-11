@@ -1,5 +1,13 @@
-# Logs
-logs
+node_modules/
+dist/
+dist-ssr/
+*.local
+*.tsbuildinfo
+.vite/
+coverage/
+.eslintcache
+
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,32 +15,53 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.crt
+secrets/
+credentials*.json
+service-account*.json
 
-# Editor directories and files
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+CODEX.md
+CURSOR.md
+COPILOT.md
+WARP.md
+zasady-projektu.md
+.claude/
+.agents/
+.gemini/
+.codex/
+.cursor/
+.cursorrules
+.windsurf/
+.windsurfrules
+.clinerules
+.roo/
+.aider*
+.continue/
+.github/copilot-instructions.md
+.mcp.json
+.playwright-mcp/
+
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# System Files & Cache
 .DS_Store
 Thumbs.db
-.agents/
-.gemini/
-.env
-.env.*
-!.env.example
-.eslintcache
+* 2
+* 2.*
 .oxlintrc.json
-dist/
-node_modules/
-

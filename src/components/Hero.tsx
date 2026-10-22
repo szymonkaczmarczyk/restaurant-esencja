@@ -377,6 +377,9 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
                 </div>
               </div>
             </div>
+            <p className="font-sans text-[11px] text-primary/55 dark:text-neutralDark-text/55 mt-4">
+              Wyróżnienia przykładowe - projekt demonstracyjny, restauracja ich nie otrzymała.
+            </p>
           </div>
 
         </div>
@@ -537,6 +540,10 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               />
             ))}
           </div>
+
+          <p className="font-sans text-xs text-primary/55 dark:text-neutralDark-text/55 mt-6">
+            Opinie przykładowe, napisane na potrzeby projektu demonstracyjnego. Osoby nie istnieją.
+          </p>
 
         </div>
       </section>

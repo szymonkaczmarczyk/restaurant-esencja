@@ -199,8 +199,9 @@ GSAP) and confetti - the first place to optimize. Dish and interior photos are l
 ## Before publishing
 
 - **Awards and reviews** - the "Master craftsmanship" section shows "Michelin Guide - Recommendation 2026" and
-  "Champion de Qualité", and the carousel contains named guest reviews. Keep only real awards and reviews, Michelin
-  is a trademark.
+  "Champion de Qualité", and the carousel contains named guest reviews. All of them are examples, and the page shows
+  a visible note that this is a demo project. Before publishing, keep only real awards and reviews. Michelin is a
+  trademark.
 - **Dish photos** come from Unsplash and not all of them match the descriptions (e.g. the venison tartare shows a bowl
   of tofu). It is best to replace them with your own photos.
 - **External content** - Google Fonts, Google Maps and Unsplash photos are loaded from external servers, include this

@@ -200,8 +200,9 @@ z Unsplash w szerokości 600–800 px.
 ## Przed publikacją
 
 - **Wyróżnienia i opinie** - sekcja „Mistrzowski kunszt” pokazuje „Michelin Guide - Rekomendacja 2026”
-  i „Champion de Qualité”, a karuzela zawiera imienne opinie gości. Zostaw tylko prawdziwe wyróżnienia
-  i opinie; nazwa Michelin jest znakiem towarowym.
+  i „Champion de Qualité”, a karuzela zawiera imienne opinie gości. Wszystko to jest przykładowe i na stronie
+  ma widoczny dopisek, że to projekt demonstracyjny. Przed publikacją zostaw tylko prawdziwe wyróżnienia
+  i opinie. Nazwa Michelin jest znakiem towarowym.
 - **Zdjęcia dań** pochodzą z Unsplash i nie wszystkie pasują do opisów (np. tatar z jelenia pokazuje
   miskę z tofu). Najlepiej zastąpić je własnymi zdjęciami.
 - **Treści zewnętrzne** - czcionki Google Fonts, mapa Google i zdjęcia z Unsplash są pobierane z serwerów

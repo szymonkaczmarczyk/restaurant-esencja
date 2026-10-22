@@ -1,5 +1,7 @@
 # Restauracja Esencja – system rezerwacji stolików
 
+**Polski** · [English](README.en.md)
+
 > Karta menu, interaktywny plan sali i panel gościa dla restauracji fine dining w Warszawie.
 
 Esencja to strona restauracji z Krakowskiego Przedmieścia połączona z rezerwacją konkretnego stolika. Gość

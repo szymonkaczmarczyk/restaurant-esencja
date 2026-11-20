@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* The site is light-only: tie dark: utilities to a .dark class (never set) instead of the OS color scheme */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -19,7 +18,7 @@
   --color-neutralDark-textDark: #222826;
   
   --font-serif: "Cormorant Garamond", serif;
-  --font-sans: "DM Sans", sans-serif;
+  --font-sans: "DM Sans Variable", sans-serif;
   
   --letter-spacing-widest: 0.15em;
   --letter-spacing-luxury: 0.08em;
@@ -39,11 +38,10 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Cormorant Garamond', serif;
-    letter-spacing: 0.05em;
+    letter-spacing: -0.02em;
   }
 }
 
-/* Custom premium scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -62,7 +60,6 @@
   background: var(--color-gold);
 }
 
-/* Glassmorphism utility */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);

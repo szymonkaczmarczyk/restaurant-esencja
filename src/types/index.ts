@@ -31,5 +31,5 @@ export interface User {
 
 export interface UserRating {
   dishId: string;
-  rating: number; // 1 to 5
+  rating: number;
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, LogOut, Menu as MenuIcon, X } from 'lucide-react';
+import { User, LogOut, Menu as MenuIcon, X, CalendarDays } from 'lucide-react';
 import { Logo } from './Logo';
 import type { User as UserType } from '../types';
 
@@ -33,23 +33,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const openReservation = () => {
+    setActiveTab('reservation');
+    setIsOpen(false);
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-light border-b border-gold/10 backdrop-blur-md">
-      {/* 3-Column balanced grid */}
-      <div className="max-w-7xl mx-auto px-6 h-20 grid grid-cols-2 md:grid-cols-3 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 grid grid-cols-2 md:grid-cols-3 items-center">
         
-        {/* Column 1: Logo (Left aligned) */}
-        <div className="flex justify-start cursor-pointer" onClick={() => setActiveTab('home')}>
+        <button
+          type="button"
+          className="flex justify-start w-fit"
+          onClick={() => setActiveTab('home')}
+          aria-label="Esencja, strona główna"
+        >
           <Logo className="h-10" />
-        </div>
+        </button>
 
-        {/* Column 2: Navigation Links (Centered) */}
         <div className="hidden md:flex justify-center items-center gap-8">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`relative font-sans text-sm tracking-luxury transition-colors duration-300 uppercase py-2 px-1 ${
+              className={`relative font-sans text-sm transition-colors duration-300 py-2 px-1 ${
                 activeTab === item.id
                   ? 'text-gold font-medium'
                   : 'text-primary/70 hover:text-gold'
@@ -67,7 +74,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           ))}
         </div>
 
-        {/* Column 3: Actions (Right aligned) */}
         <div className="hidden md:flex justify-end items-center gap-5">
           {currentUser ? (
             <div className="flex items-center gap-3">
@@ -82,33 +88,42 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={onLogout}
                 className="p-2 rounded-full hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-colors duration-200"
                 title="Wyloguj się"
+                aria-label="Wyloguj się"
               >
                 <LogOut size={16} />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => onOpenAuth('login')}
-                className="text-sm font-sans tracking-luxury uppercase text-primary/80 hover:text-gold transition-colors duration-200 px-3 py-2"
-              >
-                Zaloguj
-              </button>
-              <button
-                onClick={() => onOpenAuth('signup')}
-                className="text-sm font-sans tracking-luxury uppercase bg-gold hover:bg-gold-dark text-white px-5 py-2 rounded border border-gold transition-all duration-300 font-medium hover:shadow-lg hover:shadow-gold/20"
-              >
-                Zarejestruj
-              </button>
-            </div>
+            <button
+              onClick={() => onOpenAuth('login')}
+              className="flex items-center gap-2 text-sm font-sans text-primary/70 hover:text-gold transition-colors duration-200 py-2"
+            >
+              <User size={16} />
+              Zaloguj się
+            </button>
           )}
+          <button
+            onClick={openReservation}
+            className="group flex items-center gap-2 text-sm font-sans bg-gold hover:bg-gold-dark text-neutralDark px-5 h-11 rounded font-medium transition-colors duration-300"
+          >
+            <CalendarDays size={16} className="transition-transform duration-300 group-hover:-translate-y-px" />
+            Zarezerwuj stolik
+          </button>
         </div>
 
-        {/* Mobile menu toggle (Right aligned on mobile) */}
-        <div className="flex justify-end items-center gap-3 md:hidden">
+        <div className="flex justify-end items-center gap-2 md:hidden">
+          <button
+            onClick={openReservation}
+            className="flex shrink-0 items-center gap-2 h-11 px-3 sm:px-4 bg-gold text-neutralDark rounded font-sans text-sm font-medium"
+          >
+            <CalendarDays size={16} />
+            Rezerwuj
+          </button>
           <button
             onClick={toggleMenu}
-            className="p-2 border border-gold/20 text-primary rounded"
+            className="flex shrink-0 items-center justify-center w-11 h-11 border border-gold/20 text-primary rounded"
+            aria-label={isOpen ? 'Zamknij menu' : 'Otwórz menu'}
+            aria-expanded={isOpen}
           >
             {isOpen ? <X size={20} /> : <MenuIcon size={20} />}
           </button>
@@ -116,7 +131,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </div>
 
-      {/* Mobile menu overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -134,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setActiveTab(item.id);
                     setIsOpen(false);
                   }}
-                  className={`text-left font-sans text-base tracking-luxury uppercase py-2 border-b border-gold/5 ${
+                  className={`text-left font-sans text-base py-2 border-b border-gold/5 ${
                     activeTab === item.id
                       ? 'text-gold font-medium'
                       : 'text-primary/70'
@@ -168,14 +182,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3 pt-4 mt-2 border-t border-gold/15">
+                <div className="flex items-center justify-between gap-4 pt-4 mt-2 border-t border-gold/15 font-sans text-sm">
                   <button
                     onClick={() => {
                       onOpenAuth('login');
                       setIsOpen(false);
                     }}
-                    className="w-full text-center border border-gold/20 text-primary py-2.5 rounded font-sans tracking-luxury uppercase"
+                    className="flex items-center gap-2 min-h-11 text-primary"
                   >
+                    <User size={16} className="text-gold" />
                     Zaloguj się
                   </button>
                   <button
@@ -183,9 +198,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onOpenAuth('signup');
                       setIsOpen(false);
                     }}
-                    className="w-full text-center bg-gold text-white py-2.5 rounded font-sans font-medium tracking-luxury uppercase"
+                    className="min-h-11 text-primary/70 underline underline-offset-4 decoration-gold/40"
                   >
-                    Utwórz konto
+                    Załóż konto
                   </button>
                 </div>
               )}

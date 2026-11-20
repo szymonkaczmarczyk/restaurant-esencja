@@ -52,10 +52,8 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
     const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
 
-    // Type casting to appease gsap / scrollTrigger signatures
     const scrollTriggerScroller = scroller as any;
 
-    // Scope the tweens to this instance so cleanup doesn't kill other ScrollTriggers on the page
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,

@@ -88,7 +88,7 @@ Phone validation accepts `500600700`, `500 600 700` and `+48 500 600 700`.
 
 | Kitchen philosophy | Featured dishes |
 |---|---|
-| ![The "Passion, perfection" section with a collage of chef photos](docs/screenshots/home-philosophy.jpg) | ![Three cards of dishes recommended by the chef](docs/screenshots/home-dishes.jpg) |
+| ![The "Seasonal ingredients" section with a collage of kitchen photos](docs/screenshots/home-philosophy.jpg) | ![Three cards of dishes recommended by the chef](docs/screenshots/home-dishes.jpg) |
 
 | Menu | Contact |
 |---|---|
@@ -174,7 +174,7 @@ LICENSE                    MIT license
 ## Design
 
 The "Light Velvet Cream / Gold" palette: cream background `#F9F8F3`, gold `#B59A57`, dark green `#2C3531`. Headings in
-Cormorant Garamond, body text in DM Sans. The site has a light theme only, regardless of system settings. Animations
+Cormorant Garamond, body text in DM Sans (both self-hosted via Fontsource). The site has a light theme only, regardless of system settings. Animations
 (Framer Motion, GSAP) respect the "reduce motion" setting.
 
 ## Security and limitations
@@ -193,18 +193,20 @@ described in [`docs/documentation.pdf`](docs/documentation.pdf) in the "Security
 
 ## Performance
 
-Production build: JS 538 kB (173 kB gzip), CSS 45 kB (8 kB gzip). Most of it is animation libraries (Framer Motion,
+Production build: JS 534 kB (172 kB gzip), CSS 49 kB (9 kB gzip). Most of it is animation libraries (Framer Motion,
 GSAP) and confetti - the first place to optimize. Dish and interior photos are loaded from Unsplash at 600-800 px wide.
 
 ## Before publishing
 
-- **Awards and reviews** - the "Master craftsmanship" section shows "Michelin Guide - Recommendation 2026" and
+- **Awards and reviews** - the "Dining room" section shows "Michelin Guide - Recommendation 2026" and
   "Champion de Qualité", and the carousel contains named guest reviews. All of them are examples, and the page shows
   a visible note that this is a demo project. Before publishing, keep only real awards and reviews. Michelin is a
   trademark.
-- **Dish photos** come from Unsplash and not all of them match the descriptions (e.g. the venison tartare shows a bowl
-  of tofu). It is best to replace them with your own photos.
-- **External content** - Google Fonts, Google Maps and Unsplash photos are loaded from external servers, include this
+- **Dish photos** come from Unsplash, and dish names and descriptions are matched to what the photos show. Before
+  publishing, replace them with photos of the real menu.
+- **Contact details** - the address, phone and email are examples. Put the real ones in `ContactMap.tsx`, `Footer.tsx`
+  and the label above the hero heading.
+- **External content** - Google Maps and Unsplash photos are loaded from external servers, include this
   in the privacy policy (GDPR).
 
 ## Documentation

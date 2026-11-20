@@ -9,7 +9,6 @@ import { ContactMap } from './components/ContactMap';
 import { Auth } from './components/Auth';
 import type { User } from './types';
 
-// Each tab gets a URL hash so back/forward, refresh and shared links work
 const TAB_HASHES: Record<string, string> = {
   home: '',
   menu: 'menu',
@@ -43,14 +42,12 @@ function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
-  // Hardcode light mode
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('dark');
     localStorage.setItem('theme', 'light');
   }, []);
 
-  // Read saved active user session on mount
   useEffect(() => {
     const sessionUser = localStorage.getItem('esencja_active_user');
     if (sessionUser) {
@@ -59,16 +56,14 @@ function App() {
       } catch (e) {
         console.error("Failed parsing user session", e);
       }
-    } else if (activeTab === 'dashboard') {
-      // #panel opened without a session: send the visitor home and offer login
+    } else if (tabFromHash(window.location.hash) === 'dashboard') {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
       setActiveTabState('home');
       setAuthMode('login');
       setIsAuthOpen(true);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Scroll to top on page navigation
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
@@ -93,7 +88,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-neutralLight text-neutralDark-textDark font-sans transition-colors duration-300">
-      {/* Navigation Header */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -102,7 +96,6 @@ function App() {
         onOpenAuth={handleOpenAuth}
       />
 
-      {/* Pages Container */}
       <main>
         {activeTab === 'home' && <Hero setActiveTab={setActiveTab} />}
         {activeTab === 'menu' && (
@@ -117,10 +110,8 @@ function App() {
         )}
       </main>
 
-      {/* Footer */}
       <Footer setActiveTab={setActiveTab} />
 
-      {/* Auth Dialog Modal */}
       <Auth
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}

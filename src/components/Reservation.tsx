@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Users, Clock, Info, CheckCircle2, User as UserIcon, Phone, Mail, X } from 'lucide-react';
 import type { User, Reservation as ReservationData } from '../types';
@@ -13,11 +13,9 @@ interface ReservationProps {
 const TIME_SLOTS = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
 const DEPOSIT_PER_GUEST = 50;
 
-// "18:00" -> minutes since midnight; "2.5h" -> minutes
 const slotToMinutes = (slot: string) => { const [h, m] = slot.split(':').map(Number); return h * 60 + m; };
 const durationToMinutes = (d?: string) => Math.round(parseFloat(d || '2h') * 60);
 
-// Local calendar date as YYYY-MM-DD (toISOString would use UTC and be off by a day around midnight)
 const localDateString = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 const readReservations = (): ReservationData[] => {
@@ -60,7 +58,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
     { id: 'C1', name: 'Loża komfortowa C1', capacity: 4, x: 340, y: 75, width: 95, height: 55, rx: 8 },
     { id: 'C2', name: 'Loża komfortowa C2', capacity: 4, x: 340, y: 205, width: 95, height: 55, rx: 8 },
     { id: 'T7', name: 'Stół bankietowy T7', capacity: 6, x: 505, y: 130, width: 100, height: 70, rx: 10 },
-    { id: 'V1', name: 'Królewski Stół VIP', capacity: 8, x: 685, y: 90, width: 130, height: 85, rx: 10 },
+    { id: 'V1', name: 'Stół VIP V1', capacity: 8, x: 685, y: 90, width: 130, height: 85, rx: 10 },
   ];
 
   useEffect(() => {
@@ -72,7 +70,6 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
     setReservations(readReservations());
   }, []);
 
-  // A table is taken when an existing booking overlaps the chosen slot + duration
   useEffect(() => {
     if (date && timeSlot) {
       const start = slotToMinutes(timeSlot);
@@ -90,21 +87,22 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
     } else { setBookedTableIds([]); }
   }, [date, timeSlot, duration, reservations]);
 
-  // Hide slots that have already started when booking for today
   const today = localDateString();
-  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
-  const availableSlots = date === today ? TIME_SLOTS.filter(t => slotToMinutes(t) > nowMinutes) : TIME_SLOTS;
+  const availableSlots = useMemo(() => {
+    if (date !== today) return TIME_SLOTS;
+    const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+    return TIME_SLOTS.filter(t => slotToMinutes(t) > nowMinutes);
+  }, [date, today]);
 
   useEffect(() => {
     if (timeSlot && !availableSlots.includes(timeSlot)) setTimeSlot('');
-  }, [date]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [timeSlot, availableSlots]);
 
   const handleTableClick = (table: TableLayout) => {
     if (bookedTableIds.includes(table.id)) return;
     setSelectedTable(table);
     setGuestsCount(table.capacity);
     setErrors({});
-    // On narrow screens the form sits below the plan: bring it into view
     if (window.matchMedia('(max-width: 1023px)').matches) {
       setTimeout(() => formPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
     }
@@ -122,7 +120,6 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
     ev.preventDefault();
     if (!selectedTable || !date || !timeSlot || !validateForm()) return;
 
-    // Re-check against the latest stored bookings (another tab may have booked meanwhile)
     const latest = readReservations();
     const start = slotToMinutes(timeSlot);
     const end = start + durationToMinutes(duration);
@@ -148,7 +145,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
 
     if (currentUser) {
       const hist = JSON.parse(localStorage.getItem(`history_${currentUser.email}`) || '[]');
-      hist.unshift({ id: `TX-${Math.random().toString(36).substring(2, 9).toUpperCase()}`, description: `Rezerwacja - ${selectedTable.name}`, amount: guestsCount * DEPOSIT_PER_GUEST, date: new Date().toLocaleDateString('pl-PL'), status: 'Opłacona (Kaucja)' });
+      hist.unshift({ id: `TX-${Math.random().toString(36).substring(2, 9).toUpperCase()}`, description: `Rezerwacja - ${selectedTable.name}`, amount: guestsCount * DEPOSIT_PER_GUEST, date: new Date().toLocaleDateString('pl-PL'), status: 'Opłacona (kaucja)' });
       localStorage.setItem(`history_${currentUser.email}`, JSON.stringify(hist));
     }
 
@@ -179,18 +176,17 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
     <div className="pt-28 pb-24 min-h-screen bg-neutralLight transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="font-sans text-xs tracking-[0.2em] text-gold uppercase font-semibold">Zarezerwuj Doświadczenie</span>
-          <h1 className="font-serif text-4xl md:text-6xl text-primary font-light tracking-wide mt-3 uppercase">Plan Sali & Rezerwacja</h1>
+          <span className="font-sans text-xs tracking-[0.2em] text-gold uppercase font-semibold">Rezerwacja</span>
+          <h1 className="font-serif text-4xl md:text-6xl text-primary font-light mt-3">Wybierz stolik na planie sali</h1>
           <div className="h-0.5 w-16 bg-gold mx-auto mt-4 mb-6" />
           <p className="font-sans text-sm text-primary/70 max-w-xl mx-auto font-light leading-relaxed">Wybierz preferowaną datę i godzinę, aby sprawdzić dostępność stolików. Kliknij wolny stolik na planie i dokończ rezerwację.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           <div className="lg:col-span-8 flex flex-col gap-6 h-full">
-            {/* Filters */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-6 glass-light border border-gold/15 rounded shadow-lg">
               <div>
-                <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2.5 flex items-center gap-1.5 font-medium"><Calendar size={14} className="text-gold" /> Data Wizyty</label>
+                <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2.5 flex items-center gap-1.5 font-medium"><Calendar size={14} className="text-gold" /> Data wizyty</label>
                 <input type="date" required min={today} value={date} onChange={e => setDate(e.target.value)} className="w-full bg-neutralLight-alt text-primary border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none p-3.5 rounded font-sans text-sm transition-all duration-300 shadow-inner" />
               </div>
               <div>
@@ -208,93 +204,74 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
               </div>
             </div>
 
-            {/* Map */}
             <div className="relative glass-light border border-gold/15 rounded p-6 flex flex-col justify-between shadow-lg transition-all duration-300 flex-grow min-h-[360px] lg:min-h-[520px]">
               {!date || !timeSlot ? (
                 <div className="absolute inset-0 bg-neutralLight/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 z-20">
                   <Info className="text-gold mb-3 animate-pulse" size={32} />
-                  <h3 className="font-serif text-xl text-primary uppercase tracking-wider mb-2">Interaktywny Plan Sali</h3>
-                  <p className="font-sans text-xs text-primary/60 max-w-sm">Aby odblokować podgląd wolnych stolików, proszę wybrać <strong>Datę</strong> oraz <strong>Godzinę</strong>.</p>
+                  <h3 className="font-serif text-xl text-primary mb-2">Plan sali</h3>
+                  <p className="font-sans text-xs text-primary/60 max-w-sm">Aby odblokować podgląd wolnych stolików, wybierz <strong>datę</strong> i <strong>godzinę</strong>.</p>
                 </div>
               ) : null}
 
               <div className="w-full flex-grow flex items-center lg:justify-center overflow-x-auto">
                 <svg viewBox="0 0 900 520" className="w-full min-w-[720px] lg:min-w-0 h-full select-none" role="img" aria-label="Plan sali restauracji z dostępnością stolików">
 
-                  {/* ========== ROOM FILLS ========== */}
                   <rect x="630" y="30" width="240" height="300" fill="#B59A57" opacity="0.04" />
                   <rect x="30" y="330" width="150" height="130" fill="#2C3531" opacity="0.04" />
                   <rect x="180" y="330" width="160" height="130" fill="#B59A57" opacity="0.05" />
                   <rect x="540" y="330" width="160" height="130" fill="#2C3531" opacity="0.04" />
                   <rect x="700" y="330" width="170" height="130" fill="#2C3531" opacity="0.03" />
 
-                  {/* ========== OUTER WALLS ========== */}
                   <line x1="30" y1="30" x2="870" y2="30" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="30" y1="30" x2="30" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="870" y1="30" x2="870" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="30" y1="460" x2="420" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="470" y1="460" x2="870" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
 
-                  {/* ========== DIVIDER WALL y=330 (with WC door gap at x: 80-120) ========== */}
                   <line x1="30" y1="330" x2="80" y2="330" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="120" y1="330" x2="390" y2="330" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="500" y1="330" x2="870" y2="330" stroke={W} strokeWidth={WW} opacity={WO} />
 
-                  {/* ========== VIP WALL x=630 ========== */}
                   <line x1="630" y1="30" x2="630" y2="230" stroke={W} strokeWidth={WW+0.2} opacity={WO} />
                   <line x1="630" y1="280" x2="630" y2="330" stroke={W} strokeWidth={WW+0.2} opacity={WO} />
 
-                  {/* ========== SERVICE ROOM DIVIDERS ========== */}
-                  {/* x=180 (WC | Szatnia) — continuous, no door */}
                   <line x1="180" y1="330" x2="180" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
 
-                  {/* x=340 (Szatnia | Lobby) — gap y: 380-420 for szatnia door */}
                   <line x1="340" y1="330" x2="340" y2="380" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="340" y1="420" x2="340" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
 
-                  {/* x=540 (Lobby | WC) — gap y: 380-420 for WC door */}
                   <line x1="540" y1="330" x2="540" y2="380" stroke={W} strokeWidth={WW} opacity={WO} />
                   <line x1="540" y1="420" x2="540" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
 
-                  {/* x=700 (WC | Zaplecze) — continuous, no door */}
                   <line x1="700" y1="330" x2="700" y2="460" stroke={W} strokeWidth={WW} opacity={WO} />
 
-                  {/* ========== DOOR SWINGS (all arcs flipped to convex) ========== */}
 
-                  {/* Main Entrance (y=460, gap x: 420→470, swings outward/down) */}
                   <line x1="420" y1="460" x2="420" y2="510" stroke={W} strokeWidth="1.5" opacity="0.55" />
                   <path d="M 420,510 A 50,50 0 0,0 470,460" fill="none" stroke={W} strokeWidth="1" strokeDasharray="3,3" opacity="0.4" />
 
-                  {/* WC left door (y=330, gap x: 80→120, swings DOWN into WC room) */}
                   <line x1="80" y1="330" x2="80" y2="370" stroke={W} strokeWidth="1.5" opacity="0.5" />
                   <path d="M 80,370 A 40,40 0 0,0 120,330" fill="none" stroke={W} strokeWidth="1" strokeDasharray="3,3" opacity="0.35" />
 
-                  {/* Szatnia door (x=340, gap y: 380→420, swings LEFT into szatnia) */}
                   <line x1="340" y1="380" x2="300" y2="380" stroke={W} strokeWidth="1.5" opacity="0.5" />
                   <path d="M 300,380 A 40,40 0 0,0 340,420" fill="none" stroke={W} strokeWidth="1" strokeDasharray="3,3" opacity="0.35" />
 
-                  {/* WC right door (x=540, gap y: 380→420, swings RIGHT into WC) */}
                   <line x1="540" y1="380" x2="580" y2="380" stroke={W} strokeWidth="1.5" opacity="0.5" />
                   <path d="M 580,380 A 40,40 0 0,1 540,420" fill="none" stroke={W} strokeWidth="1" strokeDasharray="3,3" opacity="0.35" />
 
-                  {/* VIP door (x=630, gap y: 230→280, swings RIGHT into VIP) */}
                   <line x1="630" y1="230" x2="680" y2="230" stroke={W} strokeWidth="1.8" opacity="0.5" />
                   <path d="M 680,230 A 50,50 0 0,1 630,280" fill="none" stroke={W} strokeWidth="1" strokeDasharray="3,3" opacity="0.4" />
 
-                  {/* ========== PASSAGE ARCHWAY MARKERS ========== */}
                   <rect x="387" y="324" width="6" height="12" rx="1" fill={W} opacity="0.25" />
                   <rect x="497" y="324" width="6" height="12" rx="1" fill={W} opacity="0.25" />
 
-                  {/* ========== ROOM LABELS ========== */}
-                  <text x="105" y="400" textAnchor="middle" fill={W} className="font-serif text-[11px] tracking-widest font-bold" opacity="0.55">WC</text>
-                  <text x="260" y="400" textAnchor="middle" fill={W} className="font-serif text-[10px] tracking-widest font-semibold" opacity="0.55">SZATNIA</text>
-                  <text x="620" y="400" textAnchor="middle" fill={W} className="font-serif text-[11px] tracking-widest font-bold" opacity="0.55">WC</text>
-                  <text x="785" y="400" textAnchor="middle" fill={W} className="font-serif text-[9px] tracking-widest font-semibold" opacity="0.45">ZAPLECZE</text>
+                  <text x="105" y="400" textAnchor="middle" fill={W} className="font-serif text-[11px] font-bold" opacity="0.55">WC</text>
+                  <text x="260" y="400" textAnchor="middle" fill={W} className="font-serif text-[10px] font-semibold" opacity="0.55">SZATNIA</text>
+                  <text x="620" y="400" textAnchor="middle" fill={W} className="font-serif text-[11px] font-bold" opacity="0.55">WC</text>
+                  <text x="785" y="400" textAnchor="middle" fill={W} className="font-serif text-[9px] font-semibold" opacity="0.45">ZAPLECZE</text>
                   <text x="445" y="355" textAnchor="middle" fill={W} className="font-sans text-[8px] tracking-[0.2em] font-semibold" opacity="0.5">LOBBY</text>
                   <text x="445" y="490" textAnchor="middle" fill={W} className="font-sans text-[8px] tracking-widest font-semibold" opacity="0.65">WEJŚCIE</text>
                   <text x="750" y="310" textAnchor="middle" fill={W} className="font-serif text-[9px] tracking-[0.25em] font-semibold" opacity="0.55">SALA VIP</text>
 
-                  {/* ========== TABLES ========== */}
                   {tables.map((table) => {
                     const isBooked = bookedTableIds.includes(table.id);
                     const isSelected = selectedTable?.id === table.id;
@@ -311,7 +288,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                         tabIndex={isBooked ? -1 : 0}
                         aria-disabled={isBooked}
                         aria-pressed={isSelected}
-                        aria-label={`${table.name}, ${table.capacity} os.${isBooked ? ' — zajęty' : ''}`}
+                        aria-label={`${table.name}, ${table.capacity} os.${isBooked ? ', zajęty' : ''}`}
                         className={`${isBooked ? 'cursor-not-allowed' : 'cursor-pointer'} transition-all duration-300 outline-none focus-visible:[&>rect:first-child]:stroke-[3]`}
                       >
                         <rect x={table.x} y={table.y} width={table.width} height={table.height} rx={table.rx || 0} fill={fill} stroke={stroke} strokeWidth={isSelected ? 2.5 : 1.5} />
@@ -356,7 +333,6 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                 </svg>
               </div>
 
-              {/* Legend */}
               <div className="border-t border-gold/15 pt-5 mt-4 flex flex-wrap items-center justify-center gap-6 font-sans text-xs">
                 <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 bg-[#FBF9F4] border border-[#B59A57] rounded-sm" /><span className="text-primary/75">Wolny stolik</span></div>
                 <div className="flex items-center gap-2"><div className="w-3.5 h-3.5 bg-[#FEE2E2] border border-[#F87171] rounded-sm" /><span className="text-primary/75">Zajęty stolik</span></div>
@@ -365,20 +341,19 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
             </div>
           </div>
 
-          {/* Form Panel */}
           <div ref={formPanelRef} className="lg:col-span-4 h-full flex flex-col justify-between scroll-mt-24">
             <AnimatePresence mode="wait">
               {successMessage ? (
                 <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="p-8 glass-light border border-emerald-500/20 rounded shadow-xl text-center flex flex-col items-center gap-4 h-full justify-center">
                   <CheckCircle2 size={48} className="text-emerald-500 animate-bounce" />
-                  <h3 className="font-serif text-2xl text-primary uppercase tracking-wider">Potwierdzono!</h3>
+                  <h3 className="font-serif text-2xl text-primary">Potwierdzono!</h3>
                   <p className="font-sans text-sm text-primary/70 leading-relaxed font-light">Twoja rezerwacja została pomyślnie zarejestrowana.</p>
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setSuccessMessage(false)} className="mt-4 w-full bg-gold hover:bg-gold-dark text-white font-sans font-semibold tracking-luxury uppercase py-3.5 rounded transition-all duration-300">Nowa Rezerwacja</motion.button>
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setSuccessMessage(false)} className="mt-4 w-full bg-gold hover:bg-gold-dark text-neutralDark font-sans font-semibold py-3.5 rounded transition-all duration-300">Nowa rezerwacja</motion.button>
                 </motion.div>
               ) : (
                 <motion.div key="form" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="p-6 glass-light border border-gold/15 rounded shadow-xl h-full flex flex-col justify-between">
                   <div>
-                    <h3 className="font-serif text-2xl text-primary uppercase tracking-wider mb-6 pb-3 border-b border-gold/15">Dane rezerwacji</h3>
+                    <h3 className="font-serif text-2xl text-primary mb-6 pb-3 border-b border-gold/15">Dane rezerwacji</h3>
                     {selectedTable ? (
                       <form onSubmit={handleReserve} className="flex flex-col gap-4 font-sans text-sm">
                         <div className="p-4 bg-gold/10 border border-gold/20 rounded flex flex-col gap-1.5 shadow-sm">
@@ -396,7 +371,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                           {errors.phone && <span className="text-[11px] text-red-500 mt-1 block">{errors.phone}</span>}
                         </div>
                         <div>
-                          <label className="block text-xs uppercase tracking-widest text-primary/60 mb-1.5 flex items-center gap-1.5 font-medium"><Mail size={12} className="text-gold" /> Adres E-mail</label>
+                          <label className="block text-xs uppercase tracking-widest text-primary/60 mb-1.5 flex items-center gap-1.5 font-medium"><Mail size={12} className="text-gold" /> Adres e-mail</label>
                           <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className={`w-full bg-neutralLight-alt text-primary border outline-none p-3 rounded text-sm transition-all duration-300 shadow-inner ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold'}`} placeholder="np. jan@example.com" />
                           {errors.email && <span className="text-[11px] text-red-500 mt-1 block">{errors.email}</span>}
                         </div>
@@ -404,7 +379,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                           <div>
                             <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2 font-medium">Czas rezerwacji</label>
                             <select value={duration} onChange={e => setDuration(e.target.value)} className="w-full bg-neutralLight-alt text-primary border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none p-3 rounded text-sm transition-all duration-300 shadow-inner appearance-none cursor-pointer" style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg fill=\'%23B59A57\' height=\'20\' viewBox=\'0 0 24 24\' width=\'20\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>")', backgroundPosition: 'right 8px center', backgroundRepeat: 'no-repeat', paddingRight: '28px' }}>
-                              <option value="1.5h">1.5 godziny</option><option value="2h">2 godziny</option><option value="2.5h">2.5 godziny</option><option value="3h">3 godziny</option>
+                              <option value="1.5h">1,5 godziny</option><option value="2h">2 godziny</option><option value="2.5h">2,5 godziny</option><option value="3h">3 godziny</option>
                             </select>
                           </div>
                           <div>
@@ -418,7 +393,7 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                           <label className="block text-xs uppercase tracking-widest text-primary/60 mb-2 font-medium">Uwagi (alergie, preferencje)</label>
                           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className="w-full bg-neutralLight-alt text-primary border border-gold/20 focus:border-gold focus:ring-1 focus:ring-gold outline-none p-3 rounded text-sm resize-none transition-all duration-300 shadow-inner" placeholder="Wpisz opcjonalne uwagi..." />
                         </div>
-                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full bg-gold hover:bg-gold-dark text-white font-sans font-semibold tracking-luxury uppercase py-3.5 rounded mt-2 border border-gold transition-all duration-300 hover:shadow-lg hover:shadow-gold/15 cursor-pointer">Potwierdź rezerwację</motion.button>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full bg-gold hover:bg-gold-dark text-neutralDark font-sans font-semibold py-3.5 rounded mt-2 border border-gold transition-all duration-300 hover:shadow-lg hover:shadow-gold/15 cursor-pointer">Potwierdź rezerwację</motion.button>
                       </form>
                     ) : (
                       <div className="py-16 text-center text-primary/50 font-light flex flex-col items-center justify-center gap-2">
@@ -435,7 +410,6 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
         </div>
       </div>
 
-      {/* Signup Prompt Modal */}
       <AnimatePresence>
         {showSignupPrompt && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -444,11 +418,11 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
               <button onClick={() => setShowSignupPrompt(false)} className="absolute top-4 right-4 text-primary/60 hover:text-gold transition-colors duration-200"><X size={20} /></button>
               <div className="flex flex-col items-center gap-2">
                 <CheckCircle2 size={44} className="text-emerald-500" />
-                <h3 className="font-serif text-2xl text-primary uppercase tracking-wider">Rezerwacja Zapisana!</h3>
+                <h3 className="font-serif text-2xl text-primary">Rezerwacja zapisana</h3>
                 <p className="font-sans text-xs text-primary/60">Dziękujemy, {name}. Twoja rezerwacja została pomyślnie złożona.</p>
               </div>
               <div className="border-t border-b border-gold/15 py-5 text-left flex flex-col gap-3.5">
-                <h4 className="font-serif text-base text-primary uppercase tracking-wide">Załóż konto i zyskaj korzyści:</h4>
+                <h4 className="font-serif text-base text-primary">Z kontem łatwiej wrócić:</h4>
                 <ul className="font-sans text-xs text-primary/85 space-y-2">
                   <li className="flex items-start gap-2"><span className="text-gold mt-0.5">•</span><span><strong>Zarządzanie online:</strong> Łatwe przeglądanie i anulowanie rezerwacji.</span></li>
                   <li className="flex items-start gap-2"><span className="text-gold mt-0.5">•</span><span><strong>Ulubione dania:</strong> Dodawanie ulubionych pozycji z menu.</span></li>
@@ -456,8 +430,8 @@ export const Reservation: React.FC<ReservationProps> = ({ currentUser, onOpenAut
                 </ul>
               </div>
               <div className="flex flex-col gap-3">
-                <button onClick={() => { setShowSignupPrompt(false); onOpenAuth('signup'); }} className="w-full bg-gold hover:bg-gold-dark text-white font-sans font-semibold tracking-luxury uppercase py-3.5 rounded border border-gold transition-all duration-300 shadow-md">Załóż Konto Teraz</button>
-                <button onClick={() => setShowSignupPrompt(false)} className="w-full border border-gold/30 hover:border-gold hover:bg-gold/5 text-primary font-sans text-xs tracking-luxury uppercase py-3 rounded transition-all duration-300">Zamknij i przejdź do strony</button>
+                <button onClick={() => { setShowSignupPrompt(false); onOpenAuth('signup'); }} className="w-full bg-gold hover:bg-gold-dark text-neutralDark font-sans font-semibold py-3.5 rounded border border-gold transition-all duration-300 shadow-md">Załóż konto</button>
+                <button onClick={() => setShowSignupPrompt(false)} className="w-full border border-gold/30 hover:border-gold hover:bg-gold/5 text-primary font-sans text-xs py-3 rounded transition-all duration-300">Zamknij i przejdź do strony</button>
               </div>
             </motion.div>
           </div>

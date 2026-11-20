@@ -24,50 +24,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeSubTab, setActiveSubTab] = useState<'reservations' | 'favorites' | 'ratings' | 'payments'>('reservations');
 
-  // Load user data
   useEffect(() => {
     if (currentUser) {
-      // Reservations
       const userResRaw = localStorage.getItem(`reservations_${currentUser.email}`);
       setReservations(userResRaw ? JSON.parse(userResRaw) : []);
 
-      // Favorites
       const userFavsRaw = localStorage.getItem(`favs_${currentUser.email}`);
       setFavorites(userFavsRaw ? JSON.parse(userFavsRaw) : []);
 
-      // Ratings
       const userRatingsRaw = localStorage.getItem(`ratings_${currentUser.email}`);
       setRatings(userRatingsRaw ? JSON.parse(userRatingsRaw) : {});
 
-      // Payments
       const paymentsRaw = localStorage.getItem(`history_${currentUser.email}`);
       setTransactions(paymentsRaw ? JSON.parse(paymentsRaw) : []);
     }
   }, [currentUser]);
 
-  // Cancel reservation
   const handleCancelReservation = (resId: string) => {
     if (!currentUser) return;
     const cancelled = reservations.find(res => res.id === resId);
     if (!cancelled) return;
     if (!window.confirm(`Anulować rezerwację: ${cancelled.tableName}, ${cancelled.date.split('-').reverse().join('.')} o ${cancelled.timeSlot}?`)) return;
 
-    // Filter from user list
     const updatedUserRes = reservations.filter(res => res.id !== resId);
     setReservations(updatedUserRes);
     localStorage.setItem(`reservations_${currentUser.email}`, JSON.stringify(updatedUserRes));
 
-    // Filter from system-wide index
     const systemResRaw = localStorage.getItem('esencja_all_reservations');
     const systemRes: Reservation[] = systemResRaw ? JSON.parse(systemResRaw) : [];
     const updatedSystemRes = systemRes.filter(res => res.id !== resId);
     localStorage.setItem('esencja_all_reservations', JSON.stringify(updatedSystemRes));
 
-    // Add refund transaction simulation
     const refundTransaction: Transaction = {
       id: `RF-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-      description: `Zwrot Kaucji - ${cancelled.tableName}`,
-      // Refund exactly what was charged at booking (50 zł per guest)
+      description: `Zwrot kaucji - ${cancelled.tableName}`,
       amount: -cancelled.guestsCount * 50,
       date: new Date().toLocaleDateString('pl-PL'),
       status: 'Zwrócono'
@@ -77,7 +67,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
     localStorage.setItem(`history_${currentUser.email}`, JSON.stringify(updatedTransactions));
   };
 
-  // Remove dish from favorites
   const handleRemoveFavorite = (dishId: string) => {
     if (!currentUser) return;
     const updatedFavs = favorites.filter(id => id !== dishId);
@@ -85,7 +74,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
     localStorage.setItem(`favs_${currentUser.email}`, JSON.stringify(updatedFavs));
   };
 
-  // Delete/Reset dish rating
   const handleRemoveRating = (dishId: string) => {
     if (!currentUser) return;
     const updatedRatings = { ...ratings };
@@ -100,11 +88,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
     <div className="pt-28 pb-24 min-h-screen bg-neutralLight dark:bg-neutralDark transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         
-        {/* Profile Card Header */}
         <div className="p-8 glass-light dark:glass border border-gold/15 rounded flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
           <div className="flex flex-col gap-1.5 text-center md:text-left">
-            <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Panel Klienta</span>
-            <h1 className="font-serif text-3xl md:text-4xl text-primary dark:text-gold font-light tracking-wide">
+            <span className="text-[10px] uppercase tracking-widest text-gold font-semibold">Twoje konto</span>
+            <h1 className="font-serif text-3xl md:text-4xl text-primary dark:text-gold font-light">
               Witaj, {currentUser.username}
             </h1>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 text-xs text-primary/60 dark:text-neutralDark-text/60 mt-1">
@@ -116,26 +103,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
           
           <button
             onClick={() => setActiveTab('reservation')}
-            className="bg-gold hover:bg-gold-dark text-white dark:text-neutralDark font-sans font-semibold tracking-luxury uppercase px-6 py-3 rounded border border-gold transition-all duration-300 text-sm shadow-md"
+            className="bg-gold hover:bg-gold-dark text-neutralDark dark:text-neutralDark font-sans font-semibold px-6 py-3 rounded border border-gold transition-all duration-300 text-sm shadow-md"
           >
-            Zarezerwuj Nowy Stolik
+            Zarezerwuj stolik
           </button>
         </div>
 
-        {/* Dashboard Tabs */}
         <div className="flex border-b border-gold/10 gap-8 mb-8 overflow-x-auto pb-1">
           {[
-            { id: 'reservations', label: 'Moje Rezerwacje', icon: CalendarDays },
-            { id: 'favorites', label: 'Ulubione Dania', icon: Heart },
-            { id: 'ratings', label: 'Moje Oceny', icon: Star },
-            { id: 'payments', label: 'Historia Transakcji', icon: CreditCard },
+            { id: 'reservations', label: 'Moje rezerwacje', icon: CalendarDays },
+            { id: 'favorites', label: 'Ulubione dania', icon: Heart },
+            { id: 'ratings', label: 'Moje oceny', icon: Star },
+            { id: 'payments', label: 'Historia transakcji', icon: CreditCard },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveSubTab(tab.id as any)}
-                className={`flex items-center gap-2 font-sans text-sm tracking-luxury uppercase pb-4 border-b-2 transition-all duration-300 flex-shrink-0 ${
+                className={`flex items-center gap-2 font-sans text-sm pb-4 border-b-2 transition-all duration-300 flex-shrink-0 ${
                   activeSubTab === tab.id
                     ? 'border-gold text-gold font-medium'
                     : 'border-transparent text-primary/60 dark:text-neutralDark-text/60 hover:text-gold'
@@ -148,11 +134,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
           })}
         </div>
 
-        {/* Tab Contents */}
         <div className="min-h-[400px]">
           <AnimatePresence mode="wait">
             
-            {/* Reservations Tab */}
             {activeSubTab === 'reservations' && (
               <motion.div
                 key="reservations"
@@ -192,10 +176,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
                       
                       <button
                         onClick={() => handleCancelReservation(res.id)}
-                        className="flex items-center gap-2 border border-red-500/30 hover:border-red-500 text-red-500 dark:text-red-400 hover:bg-red-500/10 font-sans text-xs tracking-luxury uppercase px-4 py-2.5 rounded transition-all duration-200"
+                        className="flex items-center gap-2 border border-red-500/30 hover:border-red-500 text-red-500 dark:text-red-400 hover:bg-red-500/10 font-sans text-xs px-4 py-2.5 rounded transition-all duration-200"
                       >
                         <Trash2 size={14} />
-                        Anuluj Rezerwację
+                        Anuluj rezerwację
                       </button>
                     </div>
                   ))
@@ -203,7 +187,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
               </motion.div>
             )}
 
-            {/* Favorites Tab */}
             {activeSubTab === 'favorites' && (
               <motion.div
                 key="favorites"
@@ -215,7 +198,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
                 {favorites.length === 0 ? (
                   <div className="col-span-full text-center py-16 border border-gold/10 rounded glass-light dark:glass text-primary/50 dark:text-neutralDark-text/50 font-light flex flex-col items-center gap-2">
                     <Heart size={32} className="text-gold/40" />
-                    <p className="font-sans text-sm">Brak ulubionych dań. Dodaj je w Menu!</p>
+                    <p className="font-sans text-sm">Nie masz jeszcze ulubionych dań. Dodasz je sercem w menu.</p>
                   </div>
                 ) : (
                   menuDishes
@@ -250,7 +233,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
               </motion.div>
             )}
 
-            {/* Ratings Tab */}
             {activeSubTab === 'ratings' && (
               <motion.div
                 key="ratings"
@@ -277,7 +259,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
                           <div className="flex flex-col gap-0.5">
                             <h3 className="font-serif text-lg text-primary dark:text-gold font-medium">{dish.name}</h3>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] uppercase font-semibold text-gold">Twoja Ocena:</span>
+                              <span className="text-[10px] uppercase font-semibold text-gold">Twoja ocena:</span>
                               <div className="flex">
                                 {[...Array(ratings[dish.id])].map((_, i) => (
                                   <Star key={i} size={14} fill="#B59A57" color="#B59A57" />
@@ -300,7 +282,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
               </motion.div>
             )}
 
-            {/* Payments Tab */}
             {activeSubTab === 'payments' && (
               <motion.div
                 key="payments"
@@ -320,7 +301,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, setActiveTab 
                       <table className="w-full text-sm text-left">
                         <thead className="bg-gold/10 border-b border-gold/10 uppercase tracking-widest text-[10px] text-primary/70 dark:text-neutralDark-text/70">
                           <tr>
-                            <th className="px-6 py-4">ID Transakcji</th>
+                            <th className="px-6 py-4">ID transakcji</th>
                             <th className="px-6 py-4">Opis</th>
                             <th className="px-6 py-4">Kwota</th>
                             <th className="px-6 py-4">Data</th>

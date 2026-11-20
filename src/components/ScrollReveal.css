@@ -1,4 +1,3 @@
-/* In a layer so Tailwind utilities passed via textClassName can override these defaults */
 @layer components {
   .scroll-reveal {
     margin: 20px 0;

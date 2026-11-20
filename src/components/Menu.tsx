@@ -14,7 +14,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
-  // Sync favorites & ratings from localStorage
   useEffect(() => {
     if (currentUser) {
       const userFavs = localStorage.getItem(`favs_${currentUser.email}`);
@@ -28,7 +27,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
     }
   }, [currentUser]);
 
-  // Handle Like/Favorite toggle
   const handleToggleFavorite = (dishId: string) => {
     if (!currentUser) {
       onOpenAuth('login');
@@ -43,7 +41,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
     localStorage.setItem(`favs_${currentUser.email}`, JSON.stringify(updatedFavs));
   };
 
-  // Handle Rate dish
   const handleRateDish = (dishId: string, ratingValue: number) => {
     if (!currentUser) {
       onOpenAuth('login');
@@ -55,7 +52,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
     localStorage.setItem(`ratings_${currentUser.email}`, JSON.stringify(updatedRatings));
   };
 
-  // Filter dishes
   const filteredDishes = activeCategory === 'all'
     ? menuDishes
     : menuDishes.filter(dish => dish.category === activeCategory);
@@ -63,28 +59,26 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
   const categories = [
     { id: 'all', label: 'Wszystkie', icon: Utensils },
     { id: 'starters', label: 'Przystawki', icon: Soup },
-    { id: 'mains', label: 'Dania Główne', icon: Utensils },
+    { id: 'mains', label: 'Dania główne', icon: Utensils },
     { id: 'desserts', label: 'Desery', icon: Coffee },
-    { id: 'drinks', label: 'Napoje & Wina', icon: GlassWater },
+    { id: 'drinks', label: 'Napoje', icon: GlassWater },
   ];
 
   return (
     <div className="pt-28 pb-24 min-h-screen bg-neutralLight dark:bg-neutralDark transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         
-        {/* Header */}
         <div className="text-center mb-16">
-          <span className="font-sans text-xs tracking-[0.2em] text-gold uppercase font-semibold">Kulinarna Podróż</span>
-          <h1 className="font-serif text-4xl md:text-6xl text-primary dark:text-gold font-light tracking-wide mt-3 uppercase">
-            Menu Esencja
+          <span className="font-sans text-xs tracking-[0.2em] text-gold uppercase font-semibold">Menu</span>
+          <h1 className="font-serif text-4xl md:text-6xl text-primary dark:text-gold font-light mt-3">
+            Karta dań i napojów
           </h1>
           <div className="h-0.5 w-16 bg-gold mx-auto mt-4 mb-6" />
           <p className="font-sans text-sm text-primary/70 dark:text-neutralDark-text/70 max-w-xl mx-auto font-light leading-relaxed">
-            Prezentujemy państwu nasze autorskie menu. Każde danie to starannie zbilansowana esencja smaków, przygotowywana na świeżo z najwyższej jakości składników.
+            Przystawki, dania główne, desery i napoje. Pozycje z oznaczeniem „Szef poleca” to wybór kuchni na ten sezon. Po zalogowaniu możesz dodawać dania do ulubionych i je oceniać.
           </p>
         </div>
 
-        {/* Categories Bar */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
           {categories.map((cat) => {
             const Icon = cat.icon;
@@ -92,9 +86,9 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id as any)}
-                className={`flex items-center gap-2 font-sans text-sm tracking-luxury uppercase px-5 py-3 rounded border transition-all duration-300 ${
+                className={`flex items-center gap-2 font-sans text-sm px-5 py-3 rounded border transition-all duration-300 ${
                   activeCategory === cat.id
-                    ? 'bg-gold border-gold text-white dark:text-neutralDark font-medium'
+                    ? 'bg-gold border-gold text-neutralDark dark:text-neutralDark font-medium'
                     : 'border-gold/25 text-primary/80 dark:text-neutralDark-text/80 hover:border-gold hover:text-gold'
                 }`}
               >
@@ -105,7 +99,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
           })}
         </div>
 
-        {/* Dishes Grid */}
         <motion.div 
           layout
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -125,7 +118,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
                   key={dish.id}
                   className="glass-light dark:glass rounded overflow-hidden shadow-lg border border-gold/10 hover:border-gold/30 transition-colors duration-300 flex flex-col h-full"
                 >
-                  {/* Photo Container */}
                   <div className="h-56 overflow-hidden relative">
                     <img 
                       src={dish.image} 
@@ -133,15 +125,13 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     />
                     
-                    {/* Chef Special Badge */}
                     {dish.isChefSpecial && (
-                      <span className="absolute top-4 left-4 bg-gold text-neutralDark text-xs font-sans font-semibold tracking-wider px-3 py-1 uppercase rounded-full flex items-center gap-1 shadow-md">
+                      <span className="absolute top-4 left-4 bg-gold text-neutralDark text-xs font-sans font-semibold tracking-wider px-3 py-1 uppercase rounded flex items-center gap-1 shadow-md">
                         <Award size={12} />
-                        Szef Poleca
+                        Szef poleca
                       </span>
                     )}
 
-                    {/* Favorite Button */}
                     <button
                       onClick={() => handleToggleFavorite(dish.id)}
                       className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 border ${
@@ -155,11 +145,10 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
                     </button>
                   </div>
 
-                  {/* Content Container */}
                   <div className="p-6 flex flex-col flex-grow justify-between gap-6">
                     <div className="flex flex-col gap-2">
                       <div className="flex justify-between items-baseline gap-2">
-                        <h3 className="font-serif text-2xl text-primary dark:text-gold font-light tracking-wide leading-tight">
+                        <h3 className="font-serif text-2xl text-primary dark:text-gold font-light leading-tight">
                           {dish.name}
                         </h3>
                         <span className="font-serif text-xl text-gold font-medium flex-shrink-0">
@@ -171,11 +160,10 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
                       </p>
                     </div>
 
-                    {/* Ratings and Stats */}
                     <div className="flex items-center justify-between pt-4 border-t border-gold/10">
                       <div className="flex flex-col gap-1">
                         <span className="font-sans text-[10px] uppercase tracking-wider text-primary/50 dark:text-neutralDark-text/50">
-                          Twoja Ocena
+                          Twoja ocena
                         </span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -195,7 +183,6 @@ export const Menu: React.FC<MenuProps> = ({ currentUser, onOpenAuth }) => {
                         </div>
                       </div>
 
-                      {/* Info if not logged in */}
                       {!currentUser && (
                         <span className="text-[10px] font-sans font-light italic text-primary/40 dark:text-neutralDark-text/40">
                           Zaloguj się, aby oceniać

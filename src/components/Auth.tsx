@@ -19,7 +19,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
-  // Sync mode with the button that opened the dialog and start from a clean form each time
   useEffect(() => {
     if (!isOpen) return;
     setMode(initialMode);
@@ -30,7 +29,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
     setError('');
   }, [isOpen, initialMode]);
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -38,7 +36,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
-  // Handle Submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -63,7 +60,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
         return;
       }
 
-      // Check if email or username already exists
       if (localStorage.getItem(`user_${normalizedEmail}`)) {
         setError('Użytkownik o podanym adresie email już istnieje.');
         return;
@@ -80,9 +76,7 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
         createdAt: new Date().toISOString(),
       };
 
-      // Store in localStorage
       localStorage.setItem(`user_${normalizedEmail}`, JSON.stringify({ ...newUser, password }));
-      // Store index by username too
       localStorage.setItem(`username_${username.toLowerCase()}`, normalizedEmail);
 
       onLoginSuccess(newUser);
@@ -93,7 +87,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
         return;
       }
 
-      // Resolve email if username was provided
       const login = usernameOrEmail.trim().toLowerCase();
       let resolvedEmail = login;
       if (!login.includes('@')) {
@@ -105,10 +98,8 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
         resolvedEmail = foundEmail;
       }
 
-      // Accounts created before emails were lowercased are stored under the original spelling
       const userRaw = localStorage.getItem(`user_${resolvedEmail}`) ?? localStorage.getItem(`user_${usernameOrEmail.trim()}`);
       const userData = userRaw ? JSON.parse(userRaw) : null;
-      // Same message for unknown user and wrong password, so the form doesn't reveal which accounts exist
       if (!userData || userData.password !== password) {
         setError('Nieprawidłowe dane logowania.');
         return;
@@ -130,7 +121,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -139,7 +129,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
 
-          {/* Modal Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -147,7 +136,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
             transition={{ duration: 0.3 }}
             className="relative w-full max-w-md bg-neutralLight dark:bg-neutralDark border border-gold/20 p-8 rounded shadow-2xl z-10 transition-colors duration-300"
           >
-            {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
@@ -157,17 +145,15 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
               <X size={20} />
             </button>
 
-            {/* Modal Title */}
             <div className="text-center mb-8">
-              <h2 id="auth-title" className="font-serif text-3xl text-primary dark:text-gold font-light tracking-wide uppercase">
+              <h2 id="auth-title" className="font-serif text-3xl text-primary dark:text-gold font-light">
                 {mode === 'login' ? 'Zaloguj się' : 'Stwórz konto'}
               </h2>
               <p className="font-sans text-xs text-primary/60 dark:text-neutralDark-text/60 mt-2 tracking-wider">
-                {mode === 'login' ? 'Zaloguj się do konta restauracji Esencja' : 'Zarejestruj się, aby móc rezerwować stoliki online'}
+                {mode === 'login' ? 'Zaloguj się do konta restauracji Esencja' : 'Konto zapamięta Twoje rezerwacje, ulubione dania i oceny'}
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-sans text-sm">
               {error && (
                 <div role="alert" className="bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2.5 rounded text-xs">
@@ -175,10 +161,9 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                 </div>
               )}
 
-              {/* Username field (Shared) */}
               <div>
                 <label className="block text-xs uppercase tracking-widest text-primary/60 dark:text-neutralDark-text/60 mb-1.5">
-                  {mode === 'login' ? 'Email lub Nazwa Użytkownika' : 'Nazwa Użytkownika'}
+                  {mode === 'login' ? 'E-mail lub nazwa użytkownika' : 'Nazwa użytkownika'}
                 </label>
                 <div className="relative">
                   <UserIcon size={16} className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gold/60" />
@@ -195,11 +180,10 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                 </div>
               </div>
 
-              {/* Email (only on Signup) */}
               {mode === 'signup' && (
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-primary/60 dark:text-neutralDark-text/60 mb-1.5">
-                    Adres Email
+                    Adres e-mail
                   </label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gold/60" />
@@ -216,11 +200,10 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                 </div>
               )}
 
-              {/* Phone (only on Signup) */}
               {mode === 'signup' && (
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-primary/60 dark:text-neutralDark-text/60 mb-1.5">
-                    Numer Telefonu
+                    Numer telefonu
                   </label>
                   <div className="relative">
                     <Phone size={16} className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gold/60" />
@@ -237,7 +220,6 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                 </div>
               )}
 
-              {/* Password */}
               <div>
                 <label className="block text-xs uppercase tracking-widest text-primary/60 dark:text-neutralDark-text/60 mb-1.5">
                   Hasło
@@ -257,15 +239,13 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                 </div>
               </div>
 
-              {/* Submit CTA */}
               <button
                 type="submit"
-                className="w-full bg-gold hover:bg-gold-dark text-white dark:text-neutralDark font-sans font-semibold tracking-luxury uppercase py-3.5 rounded mt-4 border border-gold transition-all duration-300 hover:shadow-lg hover:shadow-gold/15"
+                className="w-full bg-gold hover:bg-gold-dark text-neutralDark dark:text-neutralDark font-sans font-semibold py-3.5 rounded mt-4 border border-gold transition-all duration-300 hover:shadow-lg hover:shadow-gold/15"
               >
                 {mode === 'login' ? 'Zaloguj się' : 'Utwórz konto'}
               </button>
 
-              {/* Mode switcher link */}
               <div className="text-center mt-4">
                 <button
                   type="button"
@@ -276,7 +256,7 @@ export const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialMode, onLogi
                   className="text-xs text-gold hover:text-gold-light transition-colors duration-200 underline font-light"
                 >
                   {mode === 'login'
-                    ? 'Nie posiadasz jeszcze konta? Zarejestruj się'
+                    ? 'Nie masz jeszcze konta? Załóż konto'
                     : 'Masz już konto? Zaloguj się'}
                 </button>
               </div>

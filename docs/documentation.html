@@ -100,7 +100,10 @@
   @page { size: A4; margin: 18mm 16mm; }
   @media print {
     main { padding: 0; max-width: none; }
-    section { margin-top: 0; }
+    section { margin-top: 28px; }
+    .page { break-before: auto; }
+    .keep { break-inside: avoid; }
+    th, td { padding: 7px 10px; }
     pre, .endpoint { break-inside: avoid; }
     tr:first-child { break-after: avoid; }
     tr { break-inside: avoid; }
@@ -193,8 +196,8 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
 <section id="auth">
   <h2>Konta i sesja</h2>
   <p>
-    Konto zakłada się w modalu „Stwórz konto” (przycisk <em>Zarejestruj</em> w nawigacji lub w monicie po
-    rezerwacji gościa). Po rejestracji użytkownik jest od razu zalogowany. Logować się można adresem e-mail
+    Konto zakłada się w modalu „Stwórz konto” (link <em>Załóż konto</em> pod formularzem logowania, w menu mobilnym
+    lub w monicie po rezerwacji gościa). Główny przycisk w nawigacji to <em>Zarezerwuj stolik</em>, a logowanie jest małym linkiem obok. Po rejestracji użytkownik jest od razu zalogowany. Logować się można adresem e-mail
     albo nazwą użytkownika - wielkość liter nie ma znaczenia.
   </p>
   <h4>Pola rejestracji</h4>
@@ -290,9 +293,9 @@ http://localhost:5173   (lokalnie, npm run dev)</pre>
   <h3>Obiekt Dish</h3>
 <pre>{
   "id": "main-1",
-  "name": "Polędwica Wagyu z Grzybami Leśnymi",
-  "description": "Najwyższej jakości wołowina Wagyu A5, …",
-  "price": 240,
+  "name": "Żeberka wieprzowe pieczone 12 godzin",
+  "description": "Żeberka w glazurze barbecue, frytki z parmezanem, …",
+  "price": 89,
   "category": "mains",
   "image": "https://images.unsplash.com/photo-…?w=800",
   "isChefSpecial": true
@@ -415,9 +418,11 @@ Uwagi: Rocznica - prosimy o spokojny stolik.</pre>
   </div>
   <h4>Okno potwierdzenia</h4>
 <pre>Anulować rezerwację: Stolik czteroosobowy T3, 15.10.2026 o 19:00?</pre>
+  <div class="keep">
   <h4>Skutek</h4>
   <p>Do <code>history_{email}</code> trafia transakcja zwrotu w wysokości wpłaconej kaucji:</p>
-<pre>{ "id": "RF-9QZZV50", "description": "Zwrot Kaucji - Stolik czteroosobowy T3", "amount": -200, "date": "29.09.2026", "status": "Zwrócono" }</pre>
+<pre>{ "id": "RF-9QZZV50", "description": "Zwrot kaucji - Stolik czteroosobowy T3", "amount": -200, "date": "29.09.2026", "status": "Zwrócono" }</pre>
+  </div>
 </section>
 
 <section id="k-history" class="page">
@@ -431,8 +436,8 @@ Uwagi: Rocznica - prosimy o spokojny stolik.</pre>
     <p>Zakładka „Historia transakcji” w panelu (tabela: ID, opis, kwota, data, status).</p>
   </div>
 <pre>[
-  { "id": "TX-8K2M4QD", "description": "Rezerwacja - Królewski Stół VIP", "amount": 300, "date": "20.09.2026", "status": "Opłacona (Kaucja)" },
-  { "id": "RF-3JX9PLA", "description": "Zwrot Kaucji - Stolik dwuosobowy T1", "amount": -100, "date": "18.09.2026", "status": "Zwrócono" }
+  { "id": "TX-8K2M4QD", "description": "Rezerwacja - Stół VIP V1", "amount": 300, "date": "20.09.2026", "status": "Opłacona (kaucja)" },
+  { "id": "RF-3JX9PLA", "description": "Zwrot kaucji - Stolik dwuosobowy T1", "amount": -100, "date": "18.09.2026", "status": "Zwrócono" }
 ]</pre>
   <h4>Znaczenie kluczy</h4>
   <table>
@@ -443,7 +448,7 @@ Uwagi: Rocznica - prosimy o spokojny stolik.</pre>
       <td>
         <table>
           <tr><th>Wartość</th><th>Znaczenie</th></tr>
-          <tr><td><code>Opłacona (Kaucja)</code></td><td>Kaucja pobrana przy rezerwacji</td></tr>
+          <tr><td><code>Opłacona (kaucja)</code></td><td>Kaucja pobrana przy rezerwacji</td></tr>
           <tr><td><code>Zwrócono</code></td><td>Zwrot po anulowaniu</td></tr>
         </table>
       </td></tr>
@@ -465,7 +470,7 @@ Uwagi: Rocznica - prosimy o spokojny stolik.</pre>
     <div class="endpoint__line"><span class="badge badge--delete">USUNIĘCIE</span><code>favs_{email}</code><code>ratings_{email}</code><span class="lock">wymaga sesji</span></div>
     <p>Ikona kosza w zakładkach „Ulubione dania” i „Moje oceny” panelu.</p>
   </div>
-<pre>localStorage["favs_anna.demo@example.com"]    = ["main-1", "dessert-1", "drink-2"]
+<pre>localStorage["favs_anna.demo@example.com"]    = ["main-1", "dessert-1", "drink-1"]
 localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "starter-2": 4 }</pre>
   <table>
     <tr><th>Klucz</th><th>Opis</th></tr>
@@ -492,7 +497,7 @@ localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "
     <tr><td><code>T3</code>, <code>T4</code></td><td>Stolik czteroosobowy</td><td>4</td><td>sala główna</td></tr>
     <tr><td><code>C1</code>, <code>C2</code></td><td>Loża komfortowa</td><td>4</td><td>sala główna</td></tr>
     <tr><td><code>T7</code></td><td>Stół bankietowy</td><td>6</td><td>sala główna</td></tr>
-    <tr><td><code>V1</code></td><td>Królewski Stół VIP</td><td>8</td><td>sala VIP</td></tr>
+    <tr><td><code>V1</code></td><td>Stół VIP V1</td><td>8</td><td>sala VIP</td></tr>
   </table>
   <p>Na planie są też: wejście, lobby, szatnia, dwie toalety i zaplecze. Legenda: wolny · zajęty · twój wybór.</p>
   <h4>Godziny otwarcia (stopka)</h4>
@@ -507,20 +512,20 @@ localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "
 
 <section id="menu" class="page">
   <h2>Karta menu</h2>
-  <p>Dane w <code>src/data/menuData.ts</code>. Filtr kategorii: Wszystkie · Przystawki · Dania główne · Desery · Napoje &amp; Wina.</p>
+  <p>Dane w <code>src/data/menuData.ts</code>. Filtr kategorii: Wszystkie · Przystawki · Dania główne · Desery · Napoje.</p>
   <table>
     <tr><th>ID</th><th>Danie</th><th>Cena</th><th>Szef poleca</th></tr>
-    <tr><td><code>starter-1</code></td><td>Tatar z Jelenia z Truflami</td><td>68 zł</td><td>tak</td></tr>
-    <tr><td><code>starter-2</code></td><td>Przegrzebki w Sosie z Szampana</td><td>74 zł</td><td></td></tr>
-    <tr><td><code>starter-3</code></td><td>Pianka z Koziego Sera</td><td>49 zł</td><td></td></tr>
-    <tr><td><code>main-1</code></td><td>Polędwica Wagyu z Grzybami Leśnymi</td><td>240 zł</td><td>tak</td></tr>
-    <tr><td><code>main-2</code></td><td>Halibut w Otulinie z Porów</td><td>110 zł</td><td></td></tr>
-    <tr><td><code>main-3</code></td><td>Kaczka po Staropolsku w Nowej Odsłonie</td><td>95 zł</td><td></td></tr>
-    <tr><td><code>dessert-1</code></td><td>Złota Esencja Czekoladowa</td><td>45 zł</td><td>tak</td></tr>
-    <tr><td><code>dessert-2</code></td><td>Sernik z Palonym Sianem</td><td>38 zł</td><td></td></tr>
-    <tr><td><code>drink-1</code></td><td>Dom Pérignon Vintage</td><td>180 zł</td><td></td></tr>
-    <tr><td><code>drink-2</code></td><td>Cocktail Esencja Gold</td><td>55 zł</td><td>tak</td></tr>
-    <tr><td><code>drink-3</code></td><td>Wino Brunello di Montalcino</td><td>85 zł</td><td></td></tr>
+    <tr><td><code>starter-1</code></td><td>Kurczak z bazylią na żeliwnej patelni</td><td>46 zł</td><td>tak</td></tr>
+    <tr><td><code>starter-2</code></td><td>Miska z pieczonym tofu</td><td>39 zł</td><td></td></tr>
+    <tr><td><code>starter-3</code></td><td>Miska warzywna z awokado i batatem</td><td>38 zł</td><td></td></tr>
+    <tr><td><code>main-1</code></td><td>Żeberka wieprzowe pieczone 12 godzin</td><td>89 zł</td><td>tak</td></tr>
+    <tr><td><code>main-2</code></td><td>Łosoś na szpinaku z warzywnymi wstążkami</td><td>78 zł</td><td></td></tr>
+    <tr><td><code>main-3</code></td><td>Grillowana pierś kurczaka z cytryną</td><td>64 zł</td><td></td></tr>
+    <tr><td><code>dessert-1</code></td><td>Brownie z gorzkiej czekolady</td><td>32 zł</td><td>tak</td></tr>
+    <tr><td><code>dessert-2</code></td><td>Sernik z jagodami</td><td>34 zł</td><td></td></tr>
+    <tr><td><code>dessert-3</code></td><td>Tort czekoladowy z kremem</td><td>36 zł</td><td></td></tr>
+    <tr><td><code>drink-1</code></td><td>Koktajl jeżynowy z bazylią</td><td>38 zł</td><td>tak</td></tr>
+    <tr><td><code>drink-2</code></td><td>Czerwone wino, kieliszek</td><td>32 zł</td><td></td></tr>
   </table>
   <p>Aby dodać danie, dopisz obiekt Dish do tablicy <code>menuDishes</code> z unikalnym <code>id</code>. Zdjęcia są linkowane z Unsplash (<code>?w=800</code>).</p>
 </section>
@@ -537,9 +542,10 @@ localStorage["ratings_anna.demo@example.com"] = { "main-1": 5, "dessert-1": 5, "
     <tr><td>Rezerwacje</td><td>Widoczne tylko w przeglądarce, w której powstały. Restauracja ich nie dostaje, dwa urządzenia mogą zarezerwować ten sam stolik.</td></tr>
     <tr><td>Płatności</td><td>Symulowane - brak bramki płatniczej.</td></tr>
     <tr><td>Konta</td><td>Brak weryfikacji e-maila i resetu hasła.</td></tr>
-    <tr><td>Treści zewnętrzne</td><td>Zdjęcia z Unsplash, czcionki z Google Fonts, mapa Google w iframe - ładowane z serwerów zewnętrznych (RODO: informacja w polityce prywatności).</td></tr>
+    <tr><td>Treści zewnętrzne</td><td>Zdjęcia z Unsplash i mapa Google w iframe - ładowane z serwerów zewnętrznych (RODO: informacja w polityce prywatności).</td></tr>
     <tr><td>Nawigacja</td><td>Otwiera Mapy Google w nowej karcie; nie pobiera lokalizacji w aplikacji.</td></tr>
   </table>
+  <div class="keep">
   <h4>Minimalny backend</h4>
   <p>Endpointy, które zastąpią <code>localStorage</code> 1:1:</p>
 <pre>POST   /api/auth/register      POST /api/auth/login      POST /api/auth/logout
@@ -548,6 +554,7 @@ POST   /api/reservations       GET  /api/me/reservations  DELETE /api/me/reserva
 GET    /api/me/transactions
 PUT    /api/me/favorites/:dishId   DELETE /api/me/favorites/:dishId
 PUT    /api/me/ratings/:dishId     DELETE /api/me/ratings/:dishId</pre>
+  </div>
   <p class="note">Hasła haszowane (bcrypt/argon2), sesja w ciasteczku <code>HttpOnly</code>, sprawdzanie kolizji w transakcji bazy (unikalność stolik + przedział czasu).</p>
 </section>
 
@@ -603,16 +610,16 @@ PUT    /api/me/ratings/:dishId     DELETE /api/me/ratings/:dishId</pre>
     <tr><th>Priorytet</th><th>Problem</th><th>Propozycja</th></tr>
     <tr><td class="todo">wysoki</td><td>Brak backendu: rezerwacje i konta tylko w jednej przeglądarce, hasła jawnym tekstem.</td><td>API z sekcji <a href="#limits">ograniczenia</a>; do tego czasu nie reklamować „rezerwacji w czasie rzeczywistym”.</td></tr>
     <tr><td class="todo">wysoki</td><td>„Michelin Guide - Rekomendacja 2026” i „Champion de Qualité” na stronie startowej oraz imienne opinie gości.</td><td>Zostawić tylko prawdziwe wyróżnienia i opinie (nazwa Michelin jest znakiem towarowym).</td></tr>
-    <tr><td class="todo">średni</td><td>Zdjęcia nie pasują do dań: tatar z jelenia to miska z tofu, przegrzebki to grillowana ryba, pianka z koziego sera to buddha bowl, polędwica Wagyu to żeberka.</td><td>Własne zdjęcia dań albo trafniej dobrane z Unsplash.</td></tr>
     <tr><td class="todo">średni</td><td>Sloty 12:00–21:00 nie uwzględniają godzin otwarcia: w niedzielę można zarezerwować 21:00 (zamknięcie 21:00), 20:00 na 3 h w poniedziałek kończy się po zamknięciu.</td><td>Sloty i maks. czas trwania wyliczane z dnia tygodnia.</td></tr>
     <tr><td class="todo">średni</td><td>Gość, który później założy konto na ten sam e-mail, może anulować rezerwację i dostać „zwrot” kaucji, której nie wpłacił.</td><td>Zwrot tylko gdy istnieje odpowiadająca kaucja (powiązać transakcję z <code>id</code> rezerwacji).</td></tr>
-    <tr><td class="todo">średni</td><td>Paczka JS 538 kB (173 kB gzip): framer-motion + GSAP + confetti.</td><td>Jedna biblioteka animacji, <code>import()</code> dla confetti i widoków.</td></tr>
+    <tr><td class="todo">średni</td><td>Paczka JS 534 kB (172 kB gzip): framer-motion + GSAP + confetti.</td><td>Jedna biblioteka animacji, <code>import()</code> dla confetti i widoków.</td></tr>
     <tr><td>niski</td><td>Pole „Imię i nazwisko” wypełnia się nazwą użytkownika (<code>anna_demo</code>).</td><td>Osobne pole imienia w koncie.</td></tr>
     <tr><td>niski</td><td>Dwa pola „Liczba gości” (nad planem i w formularzu) sterują tym samym.</td><td>Zostawić jedno.</td></tr>
     <tr><td>niski</td><td>Panel pokazuje minione rezerwacje razem z przyszłymi, bez sortowania.</td><td>Podział „Nadchodzące / Historia”, sortowanie po dacie.</td></tr>
     <tr><td>niski</td><td>Kaucja pokazana jako <code>+200 zł</code> na zielono - z perspektywy klienta to wydatek.</td><td>Odwrócić znaki lub dodać kolumnę „typ”.</td></tr>
     <tr><td>niski</td><td><code>.oxlintrc.json</code> jest w <code>.gitignore</code>, więc po sklonowaniu repo <code>npm run lint</code> działa na domyślnej konfiguracji.</td><td>Usunąć wpis z <code>.gitignore</code> i dodać plik do repo.</td></tr>
     <tr><td>niski</td><td><code>public/logo.png</code> ma 156 kB przy wyświetlaniu w 40 px.</td><td>Logo jako SVG lub mały WebP.</td></tr>
+    <tr><td class="ok">zrobione</td><td>Zdjęcia nie pasowały do dań (tatar z jelenia pokazywał miskę z tofu, polędwica Wagyu żeberka).</td><td>20.11.2026 nazwy, opisy i ceny dań dopasowane do zdjęć. Czcionki przeniesione z Google Fonts na Fontsource.</td></tr>
     <tr><td class="ok">zrobione</td><td>Nieużywane pliki: <code>src/assets/*</code>, <code>public/icons.svg</code>, <code>src/App.css</code>. Duplikaty <code>logo.png</code>, <code>icon.png</code>, <code>icon.ico</code> w katalogu głównym.</td><td>Usunięte 11.10.2026, szczegóły w sekcji <a href="#repo">repozytorium i licencja</a>.</td></tr>
   </table>
 </section>

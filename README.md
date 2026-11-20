@@ -88,7 +88,7 @@ użytkownika, wylogowanie. Walidacja telefonu przyjmuje `500600700`, `500 600 70
 
 | Filozofia kuchni | Polecane dania |
 |---|---|
-| ![Sekcja „Pasja, perfekcja” z kolażem zdjęć szefów kuchni](docs/screenshots/home-philosophy.jpg) | ![Trzy karty dań polecanych przez szefa kuchni](docs/screenshots/home-dishes.jpg) |
+| ![Sekcja „Sezonowe składniki” z kolażem zdjęć z kuchni](docs/screenshots/home-philosophy.jpg) | ![Trzy karty dań polecanych przez szefa kuchni](docs/screenshots/home-dishes.jpg) |
 
 | Karta menu | Kontakt |
 |---|---|
@@ -174,7 +174,7 @@ LICENSE                    licencja MIT
 ## Design
 
 Paleta „Light Velvet Cream / Gold”: kremowe tło `#F9F8F3`, złoto `#B59A57`, ciemna zieleń `#2C3531`.
-Nagłówki w Cormorant Garamond, tekst w DM Sans. Strona ma tylko jasny motyw - niezależnie od ustawień
+Nagłówki w Cormorant Garamond, tekst w DM Sans (oba lokalnie z Fontsource). Strona ma tylko jasny motyw - niezależnie od ustawień
 systemu. Animacje (Framer Motion, GSAP) respektują ustawienie „ogranicz ruch”.
 
 ## Bezpieczeństwo i ograniczenia
@@ -193,19 +193,21 @@ jest rozpisane w [`docs/documentation.pdf`](docs/documentation.pdf) w sekcji „
 
 ## Wydajność
 
-Build produkcyjny: JS 538 kB (173 kB gzip), CSS 45 kB (8 kB gzip). Większość to biblioteki animacji
+Build produkcyjny: JS 534 kB (172 kB gzip), CSS 49 kB (9 kB gzip). Większość to biblioteki animacji
 (Framer Motion, GSAP) i confetti - to pierwsze miejsce do optymalizacji. Zdjęcia dań i wnętrz są ładowane
 z Unsplash w szerokości 600–800 px.
 
 ## Przed publikacją
 
-- **Wyróżnienia i opinie** - sekcja „Mistrzowski kunszt” pokazuje „Michelin Guide - Rekomendacja 2026”
+- **Wyróżnienia i opinie** - sekcja „Sala” pokazuje „Michelin Guide - Rekomendacja 2026”
   i „Champion de Qualité”, a karuzela zawiera imienne opinie gości. Wszystko to jest przykładowe i na stronie
   ma widoczny dopisek, że to projekt demonstracyjny. Przed publikacją zostaw tylko prawdziwe wyróżnienia
   i opinie. Nazwa Michelin jest znakiem towarowym.
-- **Zdjęcia dań** pochodzą z Unsplash i nie wszystkie pasują do opisów (np. tatar z jelenia pokazuje
-  miskę z tofu). Najlepiej zastąpić je własnymi zdjęciami.
-- **Treści zewnętrzne** - czcionki Google Fonts, mapa Google i zdjęcia z Unsplash są pobierane z serwerów
+- **Zdjęcia dań** pochodzą z Unsplash, a nazwy i opisy dań są dopasowane do tego, co widać na zdjęciach.
+  Przed publikacją zastąp je zdjęciami prawdziwej karty.
+- **Dane kontaktowe** - adres, telefon i e-mail są przykładowe. Wpisz prawdziwe w `ContactMap.tsx`,
+  `Footer.tsx` i w etykiecie nad nagłówkiem hero.
+- **Treści zewnętrzne** - mapa Google i zdjęcia z Unsplash są pobierane z serwerów
   zewnętrznych; uwzględnij to w polityce prywatności (RODO).
 
 ## Dokumentacja
